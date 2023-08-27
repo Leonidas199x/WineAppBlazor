@@ -1,0 +1,87 @@
+﻿@inject WineApp.Domain.Countries.ICountryService CountryService;
+@using DataContract;
+@using Microsoft.Fast.Components.FluentUI
+
+@page "/Countries"
+
+<h3>Countries</h3>
+
+@if (hasError)
+{
+    <HxAlert Color="ThemeColor.Danger">An error has occured. </HxAlert>
+}
+<HxGrid 
+    TItem="Country" 
+    Responsive="true" 
+    DataProvider="GetGridData" 
+    PageSize="10"
+    Striped="true">
+    <Columns>
+        <HxGridColumn 
+            HeaderText="Name" 
+            ItemTextSelector="@(item => item.Name)" 
+            SortString="@nameof(Country.Name)" 
+            IsDefaultSortColumn="true"/>
+        <HxGridColumn 
+            HeaderText="ISO Code" 
+            ItemTextSelector="@(item => item.IsoCode)" 
+            SortString="@nameof(Country.IsoCode)" />
+        <HxContextMenuGridColumn>
+            <HxButton 
+                Text="Edit" 
+                Color="ThemeColor.Primary" 
+                OnClick="@(() => ShowEditModal(context))">
+            </HxButton>
+        </HxContextMenuGridColumn>
+    </Columns>
+</HxGrid>
+<HxModal 
+    @ref="editCountry" 
+    Size="ModalSize.Large" 
+    Title="Edit Country">
+    <BodyTemplate>
+        <img class="flag" src="@flagLocation" alt="Flag of @editableCountry.IsoCode" />
+        <EditForm Model="editableCountry">
+            <HxInputText Label="Name" @bind-Value="@editableCountry.Name"></HxInputText>
+            <HxInputText Label="ISO Code" @bind-Value="@editableCountry.IsoCode"></HxInputText>
+            <HxInputTextArea Label="Note" @bind-Value="@editableCountry.Note" />
+        </EditForm>
+    </BodyTemplate>
+</HxModal>
+
+@code {
+    bool hasError = false;
+    int TotalPages = 0;
+    int resultsPerPage = 10;
+    private HxModal editCountry;
+    Country editableCountry;
+    Uri flagLocation;
+
+    private async Task<GridDataProviderResult<Country>> GetGridData(GridDataProviderRequest<Country> request)
+    {
+        var page = 1;
+        if (request.StartIndex > 0)
+        {
+            page = (request.StartIndex / resultsPerPage) + 1;
+        }
+
+        var result = await CountryService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+
+        TotalPages = result.Data.TotalPages;
+
+        return new GridDataProviderResult<Country>
+        {
+            Data = result.Data.Data,
+            TotalCount = result.Data.TotalRecords
+        };
+    }
+
+    private async void ShowEditModal(Country country)
+    {
+        editableCountry = country;
+        var flagString = $"{NavigationManager.BaseUri}/images/flags/{editableCountry.IsoCode.ToLower()}.svg";
+        flagLocation = new Uri(flagString);
+
+        await InvokeAsync(editCountry.ShowAsync);
+    }
+}

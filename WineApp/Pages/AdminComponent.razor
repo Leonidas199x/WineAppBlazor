@@ -1,0 +1,26 @@
+﻿@page "/Admin"
+
+<h3>Administrator</h3>
+
+<h5>Select a card below to add/edit/delete entries</h5>
+
+<table>
+    <tr>
+        <td>
+            <HxCard>
+                <HeaderTemplate>Countries</HeaderTemplate>
+                <BodyTemplate>
+                    <HxCardTitle>Add, edit or delete countries</HxCardTitle>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@ViewCountries"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
+                </BodyTemplate>
+            </HxCard>
+        </td>
+    </tr>
+</table>
+
+@code {
+    private void ViewCountries()
+    {
+        NavigationManager.NavigateTo("/Countries");
+    }
+}

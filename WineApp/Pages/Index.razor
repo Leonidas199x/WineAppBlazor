@@ -1,0 +1,52 @@
+﻿@page "/"
+
+<PageTitle>Wine App</PageTitle>
+
+<h1>Hello, and welcome to the wine database.</h1>
+<h4>To get started, select an action from the panels below, or use the navigation menu on the left hand side.</h4>
+
+<table>
+    <tr>
+        <td>
+            <HxCard>
+                <HeaderTemplate>Wines</HeaderTemplate>
+                <BodyTemplate>
+                    <HxCardTitle>View Wines</HxCardTitle>
+                    <HxCardText>View all wines</HxCardText>
+                    <HxButton Color="ThemeColor.Primary"><HxIcon Icon="@BootstrapIcon.Eye" /></HxButton>
+                </BodyTemplate>
+            </HxCard>
+        </td>
+        <td>
+            <HxCard>
+                <HeaderTemplate>Wines</HeaderTemplate>
+                <BodyTemplate>
+                    <HxCardTitle>Add Wine</HxCardTitle>
+                    <HxCardText>Add a new wine</HxCardText>
+                    <HxButton Color="ThemeColor.Primary"><HxIcon Icon="@BootstrapIcon.Plus" /></HxButton>
+                </BodyTemplate>
+            </HxCard>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <HxCard>
+                <HeaderTemplate>Admin</HeaderTemplate>
+                <BodyTemplate>
+                    <HxCardTitle>Admin</HxCardTitle>
+                    <HxCardText>Admin area, add a country, grape...etc.</HxCardText>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@GoToAdmin"><HxIcon Icon="@BootstrapIcon.Wrench" /></HxButton>
+                </BodyTemplate>
+            </HxCard>
+        </td>
+    </tr>
+</table>
+
+@code {
+
+    private void GoToAdmin()
+    {
+        NavigationManager.NavigateTo("Admin");
+    }
+}
+
