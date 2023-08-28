@@ -1,0 +1,32 @@
+﻿using WineApp.ViewModels;
+using DataContract;
+
+namespace WineApp.Mappers
+{
+    public class CountryMapper : ICountryMapper
+    {
+        public CountryViewModel Map(Country value)
+        {
+            return new CountryViewModel
+            {
+                Id = value.Id,
+                Name = value.Name,
+                IsoCode = value.IsoCode,
+                DateCreated = value.DateCreated,
+                DateUpdated = value.DateUpdated,
+            };
+        }
+
+        public Country Map(CountryViewModel value) 
+        {
+            return new Country
+            {
+                Id = value.Id,
+                Name = value.Name,
+                IsoCode = value.IsoCode,
+                DateCreated = value.DateCreated,
+                DateUpdated = value.DateUpdated,
+            };
+        }
+    }
+}
