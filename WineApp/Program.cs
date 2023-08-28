@@ -1,6 +1,7 @@
 using Havit.Blazor.Components.Web;
 using WineApp.Domain;
 using WineApp.Domain.Countries;
+using WineApp.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -10,8 +11,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
 builder.Services.AddTransient<ICountryService, CountryService>();
+builder.Services.AddSingleton<ICountryMapper, CountryMapper>();
 
 builder.Services.AddHxServices();
+builder.Services.AddHxMessenger();
 
 builder.Services.AddHttpClient("WineApi", httpClient =>
 {

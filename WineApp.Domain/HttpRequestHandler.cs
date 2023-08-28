@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using System.Net;
+using System.Text;
 
 namespace WineApp.Domain
 {
@@ -26,10 +28,11 @@ namespace WineApp.Domain
             return new Result<T>(data, response.IsSuccessStatusCode);
         }
 
-        public async Task<Result> PostAsync(string url, StringContent body)
+        public async Task<Result> PostAsync(string url, string body)
         {
-            var client = _httpClient.CreateClient(ApiNames.WineApi);
-            var response = await client.PostAsync(url, body).ConfigureAwait(false);
+            var (client, request) = CreateClientRequest(url, body, HttpMethod.Post);
+
+            var response = await client.SendAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
             {
                 return new Result(response.IsSuccessStatusCode);
@@ -38,11 +41,11 @@ namespace WineApp.Domain
             return await HttpResponseHandler.HandleError(response).ConfigureAwait(false);
         }
 
-        public async Task<Result> PutAsync(string url, StringContent body)
+        public async Task<Result> PutAsync(string url, string body)
         {
-            var client = _httpClient.CreateClient(ApiNames.WineApi);
+            var (client, request) = CreateClientRequest(url, body, HttpMethod.Post);
 
-            var response = await client.PutAsync(url, body).ConfigureAwait(false);
+            var response = await client.SendAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
             {
                 return new Result(response.IsSuccessStatusCode);
@@ -62,6 +65,20 @@ namespace WineApp.Domain
             }
 
             return await HttpResponseHandler.HandleError(response).ConfigureAwait(false);
+        }
+
+        public (HttpClient, HttpRequestMessage) CreateClientRequest(string url, string body, HttpMethod method)
+        {
+            var client = _httpClient.CreateClient(ApiNames.WineApi);
+            var stringContent = new StringContent(body, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(method, url)
+            {
+                Content = stringContent,
+            };
+
+            request.Headers.Add(HttpRequestHeader.ContentType.ToString(), "application/json");
+
+            return (client, request);
         }
     }
 }

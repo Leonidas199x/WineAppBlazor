@@ -6,6 +6,12 @@ namespace WineApp.Domain.Countries
     {
         public Task<Result<PagedList<IEnumerable<Country>>>> GetAll(int page, int pageSize);
 
+        public Task<Result<PagedList<IEnumerable<Country>>>> Search(string name, string isoCode, int page, int pageSize);
+
         public Task<Result<Country>> Get(int id);
+
+        Task<Result> Put(Country country);
+
+        Task<Result> Post(CountryInbound country);
     }
 }

@@ -28,5 +28,15 @@ namespace WineApp.Mappers
                 DateUpdated = value.DateUpdated,
             };
         }
+
+        public CountryInbound MapNew(CountryViewModel value)
+        {
+            return new CountryInbound
+            {
+                Name = value.Name,
+                IsoCode = value.IsoCode,
+                Note = value.Note,
+            };
+        }
     }
 }

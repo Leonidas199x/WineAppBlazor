@@ -1,87 +1,320 @@
-﻿@inject WineApp.Domain.Countries.ICountryService CountryService;
-@using DataContract;
-@using Microsoft.Fast.Components.FluentUI
+﻿@inject WineApp.Domain.Countries.ICountryService CountryService
+@inject ICountryMapper CountryMapper
 
 @page "/Countries"
 
 <h3>Countries</h3>
 
-@if (hasError)
+<HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
+<HxButton Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Search" />
+
+<HxOffcanvas @ref="filter" Title="Filter">
+    <BodyTemplate>
+        <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@filterName" Label="Name" />
+        <hr/>
+        <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@filterIsoCode" Label="ISO Code" />
+        <hr/>
+        <HxButton OnClick="Filter" Text="Search" Color="ThemeColor.Secondary" />
+        <HxButton OnClick="ClearFilter" Text="Clear" Color="ThemeColor.Dark" />
+    </BodyTemplate>
+</HxOffcanvas>
+
+@if (gridError)
 {
-    <HxAlert Color="ThemeColor.Danger">An error has occured. </HxAlert>
+    <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
 }
-<HxGrid 
-    TItem="Country" 
-    Responsive="true" 
-    DataProvider="GetGridData" 
-    PageSize="10"
-    Striped="true">
-    <Columns>
-        <HxGridColumn 
-            HeaderText="Name" 
-            ItemTextSelector="@(item => item.Name)" 
-            SortString="@nameof(Country.Name)" 
-            IsDefaultSortColumn="true"/>
-        <HxGridColumn 
-            HeaderText="ISO Code" 
-            ItemTextSelector="@(item => item.IsoCode)" 
-            SortString="@nameof(Country.IsoCode)" />
-        <HxContextMenuGridColumn>
-            <HxButton 
-                Text="Edit" 
-                Color="ThemeColor.Primary" 
-                OnClick="@(() => ShowEditModal(context))">
-            </HxButton>
-        </HxContextMenuGridColumn>
-    </Columns>
-</HxGrid>
+
+@if (!isSearch)
+{
+    <HxGrid TItem="Country"
+            Responsive="true"
+            DataProvider="GetGridData"
+            PageSize="10"
+            Striped="true">
+        <Columns>
+            <HxGridColumn HeaderText="Name"
+                          ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(Country.Name)"
+                          IsDefaultSortColumn="true" />
+            <HxGridColumn HeaderText="ISO Code"
+                          ItemTextSelector="@(item => item.IsoCode)"
+                          SortString="@nameof(Country.IsoCode)" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+@if (isSearch)
+{
+    <HxGrid
+        @ref="searchGrid"
+        TItem="Country" 
+        Responsive="true" 
+        DataProvider="GetSearchData" 
+        PageSize="10"
+        Striped="true">
+        <Columns>
+            <HxGridColumn 
+                HeaderText="Name" 
+                ItemTextSelector="@(item => item.Name)" 
+                SortString="@nameof(Country.Name)" 
+                IsDefaultSortColumn="true"/>
+            <HxGridColumn 
+                HeaderText="ISO Code" 
+                ItemTextSelector="@(item => item.IsoCode)" 
+                SortString="@nameof(Country.IsoCode)" />
+            <HxContextMenuGridColumn>
+                <HxButton 
+                    Text="Edit" 
+                    Color="ThemeColor.Primary" 
+                    OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
 <HxModal 
     @ref="editCountry" 
     Size="ModalSize.Large" 
     Title="Edit Country">
     <BodyTemplate>
-        <img class="flag" src="@flagLocation" alt="Flag of @editableCountry.IsoCode" />
-        <EditForm Model="editableCountry">
-            <HxInputText Label="Name" @bind-Value="@editableCountry.Name"></HxInputText>
-            <HxInputText Label="ISO Code" @bind-Value="@editableCountry.IsoCode"></HxInputText>
-            <HxInputTextArea Label="Note" @bind-Value="@editableCountry.Note" />
+        @if(editError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+
+        @if(isEdit)
+        {
+            <img class="flag" src="@flagLocation" alt="Flag of @editableCountry.IsoCode" />
+        }
+        
+        <EditForm 
+            Model="@editableCountry"
+            OnValidSubmit=@Save>
+            <DataAnnotationsValidator />
+            <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableCountry.Name" Label="Name" />
+            <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableCountry.IsoCode" Label="ISO Code" />
+            <HxInputTextArea LabelType="LabelType.Floating" Label="Note" @bind-Value="@editableCountry.Note" />
+             <div class="modal-footer">
+                <table>
+                    <tr>
+                        <td>
+                            <HxSubmit Text="Save" Color="ThemeColor.Primary"/>
+                        </td>
+                        <td>
+                            <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal"/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </EditForm>
     </BodyTemplate>
 </HxModal>
 
 @code {
-    bool hasError = false;
+    [Inject] protected IHxMessengerService Messenger { get; set; }
+
+    bool gridError = false;
+    bool editError = false;
+    bool saveError = false;
+    bool isEdit = false;
+    bool isSearch = false;
     int TotalPages = 0;
     int resultsPerPage = 10;
-    private HxModal editCountry;
-    Country editableCountry;
+    string errorString = string.Empty;
+    private HxModal editCountry = new HxModal();
+    private HxOffcanvas filter;
+    CountryViewModel editableCountry;
     Uri flagLocation;
+    EditContext editContext;
+    string filterName = string.Empty;
+    string filterIsoCode = string.Empty;
+    private HxGrid<Country> searchGrid = new HxGrid<Country>();
 
     private async Task<GridDataProviderResult<Country>> GetGridData(GridDataProviderRequest<Country> request)
     {
-        var page = 1;
-        if (request.StartIndex > 0)
+        try
         {
-            page = (request.StartIndex / resultsPerPage) + 1;
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await CountryService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Country>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<Country>();
         }
 
-        var result = await CountryService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+    }
 
-        TotalPages = result.Data.TotalPages;
-
-        return new GridDataProviderResult<Country>
+    private async Task<GridDataProviderResult<Country>> GetSearchData(GridDataProviderRequest<Country> request)
+    {
+        try
         {
-            Data = result.Data.Data,
-            TotalCount = result.Data.TotalRecords
-        };
+            isSearch = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await CountryService.Search(filterName, filterIsoCode, page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Country>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<Country>();
+        }
+
     }
 
     private async void ShowEditModal(Country country)
     {
-        editableCountry = country;
-        var flagString = $"{NavigationManager.BaseUri}/images/flags/{editableCountry.IsoCode.ToLower()}.svg";
-        flagLocation = new Uri(flagString);
+        try
+        {
+            await SetEdit(true).ConfigureAwait(false);
+            await ClearEditError().ConfigureAwait(false);
+
+            editableCountry = CountryMapper.Map(country);
+
+            var flagString = $"{NavigationManager.BaseUri}/images/flags/{editableCountry.IsoCode.ToLower()}.svg";
+            flagLocation = new Uri(flagString);
+
+            await InvokeAsync(editCountry.ShowAsync);
+        }
+        catch (Exception)
+        {
+            editError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            Result result;
+            if (isEdit)
+            {
+                result = await SaveEdit().ConfigureAwait(false);
+            }
+            else
+            {
+                result = await SaveNew().ConfigureAwait(false);
+            }
+
+            if(!result.IsSuccess)
+            {
+                errorString = result.Error;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await ShowEditError().ConfigureAwait(false);
+                return;
+            }
+
+            Messenger.AddInformation(title: "Success", message: $"Country '{editableCountry.Name}' saved successfully.");
+            await CloseEditModal();
+        }
+        catch (Exception)
+        {
+            await ShowEditError().ConfigureAwait(false);
+        }
+    }
+
+    private async Task<Result> SaveEdit()
+    {
+        var country = CountryMapper.Map(editableCountry);
+
+        return await CountryService.Put(country).ConfigureAwait(false);
+    }
+
+    private async Task<Result> SaveNew()
+    {
+        var country = CountryMapper.MapNew(editableCountry);
+
+        return await CountryService.Post(country).ConfigureAwait(false);
+    }
+
+    private async Task ShowCreateModal()
+    {
+        await SetEdit(false).ConfigureAwait(false);
+        await ClearEditError().ConfigureAwait(false);
+        editableCountry = new CountryViewModel();
 
         await InvokeAsync(editCountry.ShowAsync);
+    }
+
+    private async Task ShowEditError()
+    {
+        editError = true;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearEditError()
+    {
+        editError = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CloseEditModal()
+    {
+        await editCountry.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task SetEdit(bool value)
+    {
+        isEdit = value;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task FilterOpen()
+    {
+        await filter.ShowAsync();
+    }
+
+    private async Task Filter()
+    {
+        isSearch = true;
+        await searchGrid.RefreshDataAsync().ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearFilter()
+    {
+        isSearch = false;
+        filterName = string.Empty;
+        filterIsoCode = string.Empty;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 }

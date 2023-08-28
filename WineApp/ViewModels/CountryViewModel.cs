@@ -6,10 +6,10 @@ namespace WineApp.ViewModels
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Name is required.")]
         public string  Name { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "ISO Code is required")]
         public string IsoCode { get; set; } = string.Empty;
 
         public string Note { get; set; } = string.Empty;

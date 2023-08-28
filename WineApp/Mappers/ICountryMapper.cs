@@ -8,5 +8,7 @@ namespace WineApp.Mappers
         CountryViewModel Map(Country value);
 
         Country Map(CountryViewModel value);
+
+        CountryInbound MapNew(CountryViewModel value);
     }
 }
