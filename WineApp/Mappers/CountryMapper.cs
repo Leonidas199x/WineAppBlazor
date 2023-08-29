@@ -14,6 +14,7 @@ namespace WineApp.Mappers
                 IsoCode = value.IsoCode,
                 DateCreated = value.DateCreated,
                 DateUpdated = value.DateUpdated,
+                Note = value.Note,
             };
         }
 
@@ -26,6 +27,7 @@ namespace WineApp.Mappers
                 IsoCode = value.IsoCode,
                 DateCreated = value.DateCreated,
                 DateUpdated = value.DateUpdated,
+                Note = value.Note,
             };
         }
 
