@@ -10,12 +10,26 @@
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
-        <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@filterName" Label="Name" />
+        <HxInputText 
+            LabelType="LabelType.Floating" 
+            ValidationMessageMode="ValidationMessageMode.None"
+            @bind-Value="@filterName"
+            Label="Name" />
         <hr/>
-        <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@filterIsoCode" Label="ISO Code" />
+        <HxInputText 
+            LabelType="LabelType.Floating" 
+            ValidationMessageMode="ValidationMessageMode.None" 
+            @bind-Value="@filterIsoCode" 
+            Label="ISO Code" />
         <hr/>
-        <HxButton OnClick="Filter" Text="Search" Color="ThemeColor.Secondary" />
-        <HxButton OnClick="ClearFilter" Text="Clear" Color="ThemeColor.Dark" />
+        <HxButton 
+            OnClick="Filter" 
+            Text="Search" 
+            Color="ThemeColor.Secondary" />
+        <HxButton 
+            OnClick="ClearFilter" 
+            Text="Clear" 
+            Color="ThemeColor.Dark" />
     </BodyTemplate>
 </HxOffcanvas>
 
@@ -26,23 +40,33 @@
 
 @if (!isSearch)
 {
-    <HxGrid TItem="Country"
-            Responsive="true"
-            DataProvider="GetGridData"
-            PageSize="10"
-            Striped="true">
+    <HxGrid
+        @ref="dataGrid"
+        TItem="Country"
+        Responsive="true"
+        DataProvider="GetGridData"
+        PageSize="10"
+        Striped="true">
         <Columns>
-            <HxGridColumn HeaderText="Name"
-                          ItemTextSelector="@(item => item.Name)"
-                          SortString="@nameof(Country.Name)"
-                          IsDefaultSortColumn="true" />
-            <HxGridColumn HeaderText="ISO Code"
-                          ItemTextSelector="@(item => item.IsoCode)"
-                          SortString="@nameof(Country.IsoCode)" />
+            <HxGridColumn 
+                HeaderText="Name"
+                ItemTextSelector="@(item => item.Name)"
+                SortString="@nameof(Country.Name)"
+                IsDefaultSortColumn="true" />
+            <HxGridColumn 
+                HeaderText="ISO Code"
+                ItemTextSelector="@(item => item.IsoCode)"
+                SortString="@nameof(Country.IsoCode)" />
             <HxContextMenuGridColumn>
-                <HxButton Text="Edit"
-                          Color="ThemeColor.Primary"
-                          OnClick="@(() => ShowEditModal(context))">
+                <HxButton 
+                    Text="Edit"
+                    Color="ThemeColor.Primary"
+                    OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton 
+                    Text="Delete"
+                    Color="ThemeColor.Dark"
+                    OnClick="@(() => ShowDeleteModal(context))">
                 </HxButton>
             </HxContextMenuGridColumn>
         </Columns>
@@ -74,11 +98,42 @@
                     Color="ThemeColor.Primary" 
                     OnClick="@(() => ShowEditModal(context))">
                 </HxButton>
+                <HxButton 
+                    Text="Delete"
+                     Color="ThemeColor.Dark"
+                     OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
             </HxContextMenuGridColumn>
         </Columns>
     </HxGrid>
 }
 
+<HxModal
+    @ref="deleteCountry"
+    Size="ModalSize.Regular"
+    Title="Delete Country">
+    <BodyTemplate>
+        @if (deleteError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <p>Are you sure you wish to delete the country with name '@deleteCountryName'?</p>
+        <p>This action cannot be undone.</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="DeleteCountry" />
+                    </td>
+                    <td>
+                        <HxButton Text="Cancel" Color="ThemeColor.Dark" OnClick="CloseDeleteModal" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </BodyTemplate>
+
+</HxModal>
 <HxModal 
     @ref="editCountry" 
     Size="ModalSize.Large" 
@@ -122,6 +177,7 @@
 
     bool gridError = false;
     bool editError = false;
+    bool deleteError = false;
     bool saveError = false;
     bool isEdit = false;
     bool isSearch = false;
@@ -129,13 +185,17 @@
     int resultsPerPage = 10;
     string errorString = string.Empty;
     private HxModal editCountry = new HxModal();
+    private HxModal deleteCountry = new HxModal();
     private HxOffcanvas filter;
     CountryViewModel editableCountry;
     Uri flagLocation;
     EditContext editContext;
     string filterName = string.Empty;
     string filterIsoCode = string.Empty;
+    private HxGrid<Country> dataGrid = new HxGrid<Country>();
     private HxGrid<Country> searchGrid = new HxGrid<Country>();
+    string deleteCountryName = string.Empty;
+    int deleteCountryId;
 
     private async Task<GridDataProviderResult<Country>> GetGridData(GridDataProviderRequest<Country> request)
     {
@@ -219,13 +279,21 @@
             var flagString = $"{NavigationManager.BaseUri}/images/flags/{editableCountry.IsoCode.ToLower()}.svg";
             flagLocation = new Uri(flagString);
 
-            await InvokeAsync(editCountry.ShowAsync);
+            await InvokeAsync(editCountry.ShowAsync).ConfigureAwait(false);
         }
         catch (Exception)
         {
             editError = true;
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
+    }
+
+    private async void ShowDeleteModal(Country country)
+    {
+        deleteCountryName = country.Name;
+        deleteCountryId = country.Id;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(deleteCountry.ShowAsync).ConfigureAwait(false);
     }
 
     private async Task Save()
@@ -279,7 +347,7 @@
         await ClearEditError().ConfigureAwait(false);
         editableCountry = new CountryViewModel();
 
-        await InvokeAsync(editCountry.ShowAsync);
+        await InvokeAsync(editCountry.ShowAsync).ConfigureAwait(false);
     }
 
     private async Task ShowEditError()
@@ -297,6 +365,11 @@
     private async Task CloseEditModal()
     {
         await editCountry.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task CloseDeleteModal()
+    {
+        await deleteCountry.HideAsync().ConfigureAwait(false);
     }
 
     private async Task SetEdit(bool value)
@@ -325,4 +398,35 @@
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
+
+    private async Task DeleteCountry()
+    {
+        try
+        {
+            await CountryService.Delete(deleteCountryId).ConfigureAwait(false);
+
+            Messenger.AddInformation(title: "Success", message: $"Country '{deleteCountryName}' deleted successfully.");
+
+            deleteCountryId = default;
+            deleteCountryName = string.Empty;
+
+            if (isSearch)
+            {
+                await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+            }
+            else
+            {
+                await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+            }
+
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await CloseDeleteModal().ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            errorString = $"There was an error deleting the country";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
 }
