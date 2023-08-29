@@ -43,7 +43,7 @@ namespace WineApp.Domain
 
         public async Task<Result> PutAsync(string url, string body)
         {
-            var (client, request) = CreateClientRequest(url, body, HttpMethod.Post);
+            var (client, request) = CreateClientRequest(url, body, HttpMethod.Put);
 
             var response = await client.SendAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
