@@ -6,7 +6,7 @@
 <h3>Countries</h3>
 
 <HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
-<HxButton Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Search" />
+<HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
@@ -137,38 +137,53 @@
 <HxModal 
     @ref="editCountry" 
     Size="ModalSize.Large" 
-    Title="Edit Country">
+    Title="@modalText">
     <BodyTemplate>
         @if(editError)
         {
             <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
         }
 
-        @if(isEdit)
-        {
-            <img class="flag" src="@flagLocation" alt="Flag of @editableCountry.IsoCode" />
-        }
-        
-        <EditForm 
-            Model="@editableCountry"
-            OnValidSubmit=@Save>
-            <DataAnnotationsValidator />
-            <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableCountry.Name" Label="Name" />
-            <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableCountry.IsoCode" Label="ISO Code" />
-            <HxInputTextArea LabelType="LabelType.Floating" Label="Note" @bind-Value="@editableCountry.Note" />
-             <div class="modal-footer">
-                <table>
-                    <tr>
-                        <td>
-                            <HxSubmit Text="Save" Color="ThemeColor.Primary"/>
-                        </td>
-                        <td>
-                            <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal"/>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </EditForm>
+        <HxTabPanel 
+            InitialActiveTabId="country-details"
+            NavVariant="NavVariant.Tabs">
+            <HxTab
+                Id="country-details"
+                Title="Details">
+                <Content>
+                    <EditForm 
+                        Model="@editableCountry"
+                        OnValidSubmit=@Save>
+                        <DataAnnotationsValidator />
+                        <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableCountry.Name" Label="Name" />
+                        <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableCountry.IsoCode" Label="ISO Code" />
+                        <HxInputTextArea LabelType="LabelType.Floating" Label="Note" @bind-Value="@editableCountry.Note" />
+                        <div class="modal-footer">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <HxSubmit Text="Save" Color="ThemeColor.Primary" />
+                                    </td>
+                                    <td>
+                                        <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </EditForm>
+                </Content>
+            </HxTab>
+            <HxTab 
+                Id="country-flag" 
+                Title="Flag"
+                Enabled="isEdit">
+                <Content>
+                    <hr />
+                    <img class="flag-edit" src="@flagLocation" alt="Sorry, a flag for @editableCountry.IsoCode is not currently available." />
+                    <hr />
+                </Content>
+            </HxTab>
+        </HxTabPanel>
     </BodyTemplate>
 </HxModal>
 
@@ -183,6 +198,7 @@
     bool isSearch = false;
     int TotalPages = 0;
     int resultsPerPage = 10;
+    string modalText = string.Empty;
     string errorString = string.Empty;
     private HxModal editCountry = new HxModal();
     private HxModal deleteCountry = new HxModal();
@@ -263,6 +279,7 @@
     {
         try
         {
+            modalText = $"Edit Country - {country.Name}";
             await SetEdit(true).ConfigureAwait(false);
             await ClearEditError().ConfigureAwait(false);
 
@@ -343,6 +360,7 @@
 
     private async Task ShowCreateModal()
     {
+        modalText = "Add New Country";
         await SetEdit(false).ConfigureAwait(false);
         await ClearEditError().ConfigureAwait(false);
         editableCountry = new CountryViewModel();
