@@ -206,7 +206,15 @@
             await SetEdit(true).ConfigureAwait(false);
             await ClearEditError().ConfigureAwait(false);
 
-            editableCountry = CountryMapper.Map(country);
+            var result = await CountryService.Get(country.Id).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                editError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            editableCountry = CountryMapper.Map(result.Data);
 
             var flagString = $"{NavigationManager.BaseUri}/images/flags/{editableCountry.IsoCode.ToLower()}.svg";
             flagLocation = new Uri(flagString);
