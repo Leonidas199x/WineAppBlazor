@@ -72,3 +72,11 @@ a, .btn-link {
     height: 7.5rem;
     margin: auto;
 }
+
+.index-card {
+    width: 33%;
+}
+
+.index-table {
+    width: 100%;
+}
