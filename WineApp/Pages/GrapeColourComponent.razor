@@ -34,12 +34,13 @@
 
 @if (!isSearch)
 {
-    <HxGrid @ref="dataGrid"
-            TItem="GrapeColour"
-            Responsive="true"
-            DataProvider="GetGridData"
-            PageSize="10"
-            Striped="true">
+    <HxGrid 
+        @ref="dataGrid"
+        TItem="GrapeColour"
+        Responsive="true"
+        DataProvider="GetGridData"
+        PageSize="10"
+        Striped="true">
         <Columns>
             <HxGridColumn 
                 HeaderText="Name"
