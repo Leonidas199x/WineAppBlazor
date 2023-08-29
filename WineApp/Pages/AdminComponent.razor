@@ -15,6 +15,24 @@
                 </BodyTemplate>
             </HxCard>
         </td>
+        <td class="index-card">
+            <HxCard>
+                <HeaderTemplate>Grapes</HeaderTemplate>
+                <BodyTemplate>
+                    <HxCardTitle>Add, edit or delete grapes</HxCardTitle>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@ViewGrapes"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
+                </BodyTemplate>
+            </HxCard>
+        </td>
+        <td class="index-card">
+            <HxCard>
+                <HeaderTemplate>Grape Colours</HeaderTemplate>
+                <BodyTemplate>
+                    <HxCardTitle>Add, edit or delete grape colours</HxCardTitle>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@ViewGrapeColours"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
+                </BodyTemplate>
+            </HxCard>
+        </td>
     </tr>
 </table>
 
@@ -22,5 +40,15 @@
     private void ViewCountries()
     {
         NavigationManager.NavigateTo("/Countries");
+    }
+
+    private void ViewGrapes()
+    {
+        NavigationManager.NavigateTo("/Grapes");
+    }
+
+    private void ViewGrapeColours()
+    {
+        NavigationManager.NavigateTo("/GrapeColours");
     }
 }
