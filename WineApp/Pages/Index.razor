@@ -5,9 +5,9 @@
 <h1>Hello, and welcome to the wine database.</h1>
 <h4>To get started, select an action from the panels below, or use the navigation menu on the left hand side.</h4>
 
-<table>
+<table class="index-table">
     <tr>
-        <td>
+        <td class="index-card">
             <HxCard>
                 <HeaderTemplate>Wines</HeaderTemplate>
                 <BodyTemplate>
@@ -17,7 +17,7 @@
                 </BodyTemplate>
             </HxCard>
         </td>
-        <td>
+        <td class="index-card">
             <HxCard>
                 <HeaderTemplate>Wines</HeaderTemplate>
                 <BodyTemplate>
@@ -27,9 +27,19 @@
                 </BodyTemplate>
             </HxCard>
         </td>
+        <td class="index-card">
+            <HxCard>
+                <HeaderTemplate>Reports</HeaderTemplate>
+                <BodyTemplate>
+                    <HxCardTitle>View Reports</HxCardTitle>
+                    <HxCardText>View a series of reports</HxCardText>
+                    <HxButton Color="ThemeColor.Primary"><HxIcon Icon="@BootstrapIcon.Plus" /></HxButton>
+                </BodyTemplate>
+            </HxCard>
+        </td>
     </tr>
     <tr>
-        <td>
+        <td class="index-card">
             <HxCard>
                 <HeaderTemplate>Admin</HeaderTemplate>
                 <BodyTemplate>
