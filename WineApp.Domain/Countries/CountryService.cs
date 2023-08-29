@@ -52,9 +52,19 @@ namespace WineApp.Domain.Countries
         public async Task<Result> Post(CountryInbound country)
         {
             var json = JsonConvert.SerializeObject(country);
+
             return await _request
                     .PostAsync(_endpoint, json)
                     .ConfigureAwait(false);
+        }
+
+        public async Task<Result> Delete(int countryId)
+        {
+            var url = $"{_endpoint}/{countryId}";
+
+            return await _request
+                        .DeleteAsync(url) 
+                        .ConfigureAwait(false);
         }
     }
 }

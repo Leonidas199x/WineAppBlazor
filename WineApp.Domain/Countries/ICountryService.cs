@@ -13,5 +13,7 @@ namespace WineApp.Domain.Countries
         Task<Result> Put(Country country);
 
         Task<Result> Post(CountryInbound country);
+
+        Task<Result> Delete(int countryId);
     }
 }
