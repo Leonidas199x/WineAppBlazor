@@ -67,10 +67,14 @@ a, .btn-link {
     content: "An error has occurred."
 }
 
-.flag {
-    width: 10rem;
-    height: 7.5rem;
+.flag-edit {
+    width: 20rem;
+    height: 15rem;
     margin: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
 }
 
 .index-card {
