@@ -77,6 +77,12 @@ a, .btn-link {
     width: 50%;
 }
 
+.admin-filter {
+    position: absolute;
+    right: 20px;
+    padding: 10px;
+}
+
 .index-card {
     width: 33%;
 }
