@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34018.315
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WineApp", "WineApp\WineApp.csproj", "{20822274-EB5F-4EF5-91DD-C544AB301D97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WineApp", "WineApp\WineApp.csproj", "{20822274-EB5F-4EF5-91DD-C544AB301D97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WineApp.Domain", "WineApp.Domain\WineApp.Domain.csproj", "{7D60A02F-C016-4D00-8DCD-0F8653E8D0CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WineApp.Domain", "WineApp.Domain\WineApp.Domain.csproj", "{7D60A02F-C016-4D00-8DCD-0F8653E8D0CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
