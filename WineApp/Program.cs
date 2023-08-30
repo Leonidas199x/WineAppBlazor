@@ -2,6 +2,7 @@ using Havit.Blazor.Components.Web;
 using WineApp.Domain;
 using WineApp.Domain.Countries;
 using WineApp.Domain.GrapeColour;
+using WineApp.Domain.StopperType;
 using WineApp.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,8 +14,10 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
 builder.Services.AddTransient<ICountryService, CountryService>();
 builder.Services.AddTransient<IGrapeColourService, GrapeColourService>();
+builder.Services.AddTransient<IStopperTypeService, StopperTypeService>();
 builder.Services.AddSingleton<ICountryMapper, CountryMapper>();
 builder.Services.AddSingleton<IGrapeColourMapper, GrapeColourMapper>();
+builder.Services.AddSingleton<IStopperTypeMapper, StopperTypeMapper>();
 
 builder.Services.AddHxServices();
 builder.Services.AddHxMessenger();
