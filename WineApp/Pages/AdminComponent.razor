@@ -34,6 +34,17 @@
             </HxCard>
         </td>
     </tr>
+    <tr>
+        <td class="index-card">
+            <HxCard>
+                <HeaderTemplate>Stopper Types</HeaderTemplate>
+                <BodyTemplate>
+                    <HxCardTitle>Add, edit or delete stopper types</HxCardTitle>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@ViewStopperTypes"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
+                </BodyTemplate>
+            </HxCard>
+        </td>
+    </tr>
 </table>
 
 @code {
@@ -50,5 +61,10 @@
     private void ViewGrapeColours()
     {
         NavigationManager.NavigateTo("/GrapeColours");
+    }
+
+    private void ViewStopperTypes()
+    {
+        NavigationManager.NavigateTo("/StopperTypes");
     }
 }
