@@ -6,7 +6,7 @@
 <h3>Grape Colours</h3>
 
 <HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
-<HxButton Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Search" />
+<HxButton CssClass= "admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
@@ -276,7 +276,7 @@
             var result = (isEdit) 
                         ? await SaveEdit().ConfigureAwait(false) 
                         : await SaveNew().ConfigureAwait(false);
-           
+
             if (!result.IsSuccess)
             {
                 errorString = result.Error;
@@ -284,6 +284,8 @@
                 await ShowEditError().ConfigureAwait(false);
                 return;
             }
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
 
             Messenger.AddInformation(title: "Success", message: $"Grape Colour '{editableGrapeColour.Colour}' saved successfully.");
             await CloseEditModal();
@@ -376,14 +378,7 @@
             deleteColourId = default;
             deleteGrapeColour = string.Empty;
 
-            if (isSearch)
-            {
-                await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
-            }
-            else
-            {
-                await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
-            }
+            await RefreshGrid(isSearch).ConfigureAwait(false);
 
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
             await CloseDeleteModal().ConfigureAwait(false);
@@ -393,5 +388,17 @@
             errorString = $"There was an error deleting the grape colour";
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
+    }
+
+    private async Task RefreshGrid(bool isSearch)
+    {
+        if (isSearch)
+        {
+            await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+
+            return;
+        }
+
+        await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
     }
 }
