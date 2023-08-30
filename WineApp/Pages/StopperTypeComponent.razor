@@ -1,0 +1,411 @@
+﻿@inject WineApp.Domain.StopperType.IStopperTypeService StopperTypeService
+@inject IStopperTypeMapper StopperTypeMapper
+
+@page "/StopperTypes"
+
+<h3>Stopper Types</h3>
+
+<HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
+<HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+
+<HxOffcanvas @ref="filter" Title="Filter">
+    <BodyTemplate>
+        <HxInputText 
+            LabelType="LabelType.Floating"
+            ValidationMessageMode="ValidationMessageMode.None"
+            @bind-Value="@filterColour"
+            Label="Name" />
+        <hr />
+        <HxButton 
+            OnClick="Filter"
+            Text="Search"
+            Color="ThemeColor.Secondary" />
+        <HxButton 
+            OnClick="ClearFilter"
+            Text="Clear"
+            Color="ThemeColor.Dark" />
+    </BodyTemplate>
+</HxOffcanvas>
+
+@if (gridError)
+{
+    <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
+}
+
+@if (!isSearch)
+{
+    <HxGrid 
+        @ref="dataGrid"
+        TItem="StopperType"
+        Responsive="true"
+        DataProvider="GetGridData"
+        PageSize="10"
+        Striped="true">
+        <Columns>
+            <HxGridColumn 
+                HeaderText="Name"
+                ItemTextSelector="@(item => item.Name)"
+                SortString="@nameof(StopperType.Name)"
+                IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton 
+                    Text="Edit"
+                    Color="ThemeColor.Primary"
+                    OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton 
+                    Text="Delete"
+                    Color="ThemeColor.Dark"
+                    OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+@if (isSearch)
+{
+    <HxGrid 
+        @ref="searchGrid"
+        TItem="StopperType"
+        Responsive="true"
+        DataProvider="GetSearchData"
+        PageSize="10"
+        Striped="true">
+        <Columns>
+            <HxGridColumn 
+                HeaderText="Colour"
+                ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(StopperType.Name)"
+                IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton 
+                    Text="Edit"
+                    Color="ThemeColor.Primary"
+                    OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton 
+                    Text="Delete"
+                    Color="ThemeColor.Dark"
+                    OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+<HxModal 
+    @ref="deleteStopperType"
+    Size="ModalSize.Regular"
+    Title="Delete Stopper Type">
+    <BodyTemplate>
+        @if (deleteError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <p>Are you sure you wish to delete the stopper type '@deleteStopperTypeName'?</p>
+        <p>This action cannot be undone.</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
+                    </td>
+                    <td>
+                        <HxButton Text="Cancel" Color="ThemeColor.Dark" OnClick="CloseDeleteModal" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </BodyTemplate>
+
+</HxModal>
+<HxModal 
+    @ref="editStopperType"
+    Size="ModalSize.Large"
+    Title="@modalText">
+    <BodyTemplate>
+        @if (editError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <EditForm 
+            Model="@editableStopperType"
+             OnValidSubmit=@Save>
+            <DataAnnotationsValidator />
+            <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableStopperType.Name" Label="Name" />
+            <div class="modal-footer">
+                <table>
+                    <tr>
+                        <td>
+                            <HxSubmit Text="Save" Color="ThemeColor.Primary" />
+                        </td>
+                        <td>
+                            <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </EditForm>
+    </BodyTemplate>
+</HxModal>
+
+@code {
+    [Inject] protected IHxMessengerService Messenger { get; set; }
+
+    bool gridError = false;
+    bool editError = false;
+    bool deleteError = false;
+    bool saveError = false;
+    bool isEdit = false;
+    bool isSearch = false;
+    int TotalPages = 0;
+    int resultsPerPage = 10;
+    string errorString = string.Empty;
+    private HxModal editStopperType = new HxModal();
+    private HxModal deleteStopperType = new HxModal();
+    private HxOffcanvas filter;
+    StopperTypeViewModel editableStopperType;
+    EditContext editContext;
+    string filterColour = string.Empty;
+    private HxGrid<StopperType> dataGrid = new HxGrid<StopperType>();
+    private HxGrid<StopperType> searchGrid = new HxGrid<StopperType>();
+    string deleteStopperTypeName = string.Empty;
+    int deleteStopperId;
+    string modalText = string.Empty;
+
+    private async Task<GridDataProviderResult<StopperType>> GetGridData(GridDataProviderRequest<StopperType> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await StopperTypeService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<StopperType>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<StopperType>();
+        }
+
+    }
+
+    private async Task<GridDataProviderResult<StopperType>> GetSearchData(GridDataProviderRequest<StopperType> request)
+    {
+        try
+        {
+            isSearch = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await StopperTypeService.Search(filterColour, page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<StopperType>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<StopperType>();
+        }
+
+    }
+
+    private async void ShowEditModal(StopperType value)
+    {
+        try
+        {
+            modalText = "Edit Stopper Type";
+            await SetEdit(true).ConfigureAwait(false);
+            await ClearEditError().ConfigureAwait(false);
+
+            var result = await StopperTypeService.Get(value.Id).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                editError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            editableStopperType = StopperTypeMapper.Map(result.Data);
+
+            await InvokeAsync(editStopperType.ShowAsync).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            editError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async void ShowDeleteModal(StopperType value)
+    {
+        deleteStopperId = value.Id;
+        deleteStopperTypeName = value.Name;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(deleteStopperType.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            var result = (isEdit)
+                        ? await SaveEdit().ConfigureAwait(false)
+                        : await SaveNew().ConfigureAwait(false);
+
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await ShowEditError().ConfigureAwait(false);
+                return;
+            }
+
+            if (isSearch)
+            {
+                await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+            }
+            else
+            {
+                await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+            }
+
+            Messenger.AddInformation(title: "Success", message: $"Stopper Type '{editableStopperType.Name}' saved successfully.");
+
+            await CloseEditModal();
+        }
+        catch (Exception)
+        {
+            await ShowEditError().ConfigureAwait(false);
+        }
+    }
+
+    private async Task<Result> SaveEdit()
+    {
+        var colour = StopperTypeMapper.Map(editableStopperType);
+
+        return await StopperTypeService.Put(colour).ConfigureAwait(false);
+    }
+
+    private async Task<Result> SaveNew()
+    {
+        var stopperType = StopperTypeMapper.MapNew(editableStopperType);
+
+        return await StopperTypeService.Post(stopperType).ConfigureAwait(false);
+    }
+
+    private async Task ShowCreateModal()
+    {
+        modalText = "Add Stopper Type";
+        await SetEdit(false).ConfigureAwait(false);
+        await ClearEditError().ConfigureAwait(false);
+        editableStopperType = new StopperTypeViewModel();
+
+        await InvokeAsync(editStopperType.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task ShowEditError()
+    {
+        editError = true;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearEditError()
+    {
+        editError = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CloseEditModal()
+    {
+        await editStopperType.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task CloseDeleteModal()
+    {
+        await deleteStopperType.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task SetEdit(bool value)
+    {
+        isEdit = value;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task FilterOpen()
+    {
+        await filter.ShowAsync();
+    }
+
+    private async Task Filter()
+    {
+        isSearch = true;
+        await searchGrid.RefreshDataAsync().ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearFilter()
+    {
+        isSearch = false;
+        filterColour = string.Empty;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            await StopperTypeService.Delete(deleteStopperId).ConfigureAwait(false);
+
+            Messenger.AddInformation(title: "Success", message: $"Stopper Type '{deleteStopperTypeName}' deleted successfully.");
+
+            deleteStopperId = default;
+            deleteStopperTypeName = string.Empty;
+
+            if (isSearch)
+            {
+                await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+            }
+            else
+            {
+                await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+            }
+
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await CloseDeleteModal().ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            errorString = $"There was an error deleting the stopper type";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+}
