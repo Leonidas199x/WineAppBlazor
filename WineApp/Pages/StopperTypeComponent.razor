@@ -288,14 +288,7 @@
                 return;
             }
 
-            if (isSearch)
-            {
-                await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
-            }
-            else
-            {
-                await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
-            }
+            await RefreshGrid(isSearch).ConfigureAwait(false);
 
             Messenger.AddInformation(title: "Success", message: $"Stopper Type '{editableStopperType.Name}' saved successfully.");
 
@@ -390,14 +383,7 @@
             deleteStopperId = default;
             deleteStopperTypeName = string.Empty;
 
-            if (isSearch)
-            {
-                await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
-            }
-            else
-            {
-                await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
-            }
+            await RefreshGrid(isSearch).ConfigureAwait(false);
 
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
             await CloseDeleteModal().ConfigureAwait(false);
@@ -407,5 +393,17 @@
             errorString = $"There was an error deleting the stopper type";
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
+    }
+
+    private async Task RefreshGrid(bool isSearch)
+    {
+        if (isSearch)
+        {
+            await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+
+            return;
+        }
+
+        await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
     }
 }
