@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject IJSRuntime JS
 
 <HxMessenger Position="ToastContainerPosition.BottomEnd" />
 
@@ -14,8 +15,8 @@
             <HxDropdownButtonGroup>
                 <HxDropdownToggleButton Color="ThemeColor.Secondary"><HxIcon Icon="BootstrapIcon.CloudMoon"/></HxDropdownToggleButton>
                 <HxDropdownMenu>
-                    <HxDropdownItem><HxIcon Icon="BootstrapIcon.Moon" /> Dark</HxDropdownItem>
-                    <HxDropdownItem><HxIcon Icon="BootstrapIcon.Sun" /> Light</HxDropdownItem>
+                    <HxDropdownItem OnClick="@(() => SetTheme("dark"))"><HxIcon Icon="BootstrapIcon.Moon" /> Dark</HxDropdownItem>
+                    <HxDropdownItem OnClick="@(() => SetTheme("light"))"><HxIcon Icon="BootstrapIcon.Sun" /> Light</HxDropdownItem>
                 </HxDropdownMenu>
             </HxDropdownButtonGroup>
         </div>
@@ -25,3 +26,10 @@
         </article>
     </main>
 </div>
+
+@code {
+    private async Task SetTheme(string theme)
+    {
+        await JS.InvokeAsync<string>("setTheme", theme);
+    }
+}
