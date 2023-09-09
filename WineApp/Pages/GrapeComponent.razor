@@ -1,0 +1,104 @@
+﻿@* @page "/Grapes"
+
+<h3>Grapes</h3>
+
+<HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
+<HxButton Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Search" />
+
+<HxOffcanvas @ref="filter" Title="Filter">
+    <BodyTemplate>
+        <HxInputText 
+            LabelType="LabelType.Floating" 
+            ValidationMessageMode="ValidationMessageMode.None"
+            @bind-Value="@filterGrapeName"
+            Label="Name" />
+        <hr/>
+        <HxInputText 
+            LabelType="LabelType.Floating" 
+            ValidationMessageMode="ValidationMessageMode.None" 
+            @bind-Value="@filterGrapeColour" 
+            Label="ISO Code" />
+        <hr/>
+        <HxButton 
+            OnClick="Filter" 
+            Text="Search" 
+            Color="ThemeColor.Secondary" />
+        <HxButton 
+            OnClick="ClearFilter" 
+            Text="Clear" 
+            Color="ThemeColor.Dark" />
+    </BodyTemplate>
+</HxOffcanvas>
+@if (gridError)
+{
+    <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
+}
+
+@if (!isSearch)
+{
+    <HxGrid 
+        @ref="dataGrid"
+        TItem="Grape"
+        Responsive="true"
+        DataProvider="GetGridData"
+        PageSize="10"
+        Striped="true">
+        <Columns>
+            <HxGridColumn 
+                HeaderText="Name"
+                ItemTextSelector="@(item => item.Name)"
+                SortString="@nameof(Grape.Name)"
+                IsDefaultSortColumn="true" />
+            <HxGridColumn 
+                HeaderText="ISO Code"
+                ItemTextSelector="@(item => item.IsoCode)"
+                SortString="@nameof(Grape.GrapeColourId)" />
+            <HxContextMenuGridColumn>
+                <HxButton 
+                    Text="Edit"
+                    Color="ThemeColor.Primary"
+                    OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Dark"
+                          OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+@if (isSearch)
+{
+    <HxGrid @ref="searchGrid"
+            TItem="Grape"
+            Responsive="true"
+            DataProvider="GetSearchData"
+            PageSize="10"
+            Striped="true">
+        <Columns>
+            <HxGridColumn HeaderText="Name"
+                          ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(Country.Name)"
+                          IsDefaultSortColumn="true" />
+            <HxGridColumn HeaderText="ISO Code"
+                          ItemTextSelector="@(item => item.IsoCode)"
+                          SortString="@nameof(Country.IsoCode)" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Dark"
+                          OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+@code {
+
+}
+ *@
