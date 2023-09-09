@@ -3,7 +3,7 @@
 
 @page "/StopperTypes"
 
-<h3>Stopper Types</h3>
+<h3><HxIcon Icon="BootstrapIcon.Plug" CssClass="page-icon" />Stopper Types</h3>
 
 <HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
 <HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
@@ -29,6 +29,7 @@
 
 @if (gridError)
 {
+    <div class="spacer" />
     <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
 }
 

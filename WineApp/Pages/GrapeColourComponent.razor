@@ -3,7 +3,7 @@
 
 @page "/GrapeColours"
 
-<h3>Grape Colours</h3>
+<h3><HxIcon Icon="BootstrapIcon.Palette" CssClass="page-icon" />Grape Colours</h3>
 
 <HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
 <HxButton CssClass= "admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
@@ -29,6 +29,7 @@
 
 @if (gridError)
 {
+    <div class="spacer" />
     <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
 }
 

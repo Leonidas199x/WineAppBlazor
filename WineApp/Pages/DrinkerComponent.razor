@@ -3,7 +3,7 @@
 
 @page "/Drinkers"
 
-<h3>Drinkers</h3>
+<h3><HxIcon Icon="BootstrapIcon.Cup" CssClass="page-icon" />Drinkers</h3>
 
 <HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
 <HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
@@ -26,6 +26,7 @@
 
 @if (gridError)
 {
+    <div class="spacer" />
     <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
 }
 
