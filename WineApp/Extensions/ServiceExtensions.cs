@@ -4,6 +4,7 @@ using WineApp.Domain.GrapeColour;
 using WineApp.Domain.StopperType;
 using WineApp.Domain;
 using WineApp.Mappers;
+using WineApp.Domain.Retailer;
 
 namespace WineApp.Extensions
 {
@@ -16,6 +17,7 @@ namespace WineApp.Extensions
             services.AddTransient<IGrapeColourService, GrapeColourService>();
             services.AddTransient<IStopperTypeService, StopperTypeService>();
             services.AddTransient<IDrinkerService, DrinkerService>();
+            services.AddTransient<IRetailerService, RetailerService>();
         }
 
         public static void RegisterUserMappers(this IServiceCollection services) 
