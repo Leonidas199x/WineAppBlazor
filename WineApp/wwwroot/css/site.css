@@ -90,3 +90,17 @@ a, .btn-link {
 .index-table {
     width: 100%;
 }
+
+.top-row {
+    height: 5px;
+}
+
+.wine-icon {
+    height: 30px;
+}
+
+.page-icon {
+    height: 50px;
+    width: 50px;
+    display: inline-block;
+}
