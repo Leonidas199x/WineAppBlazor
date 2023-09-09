@@ -26,6 +26,7 @@ namespace WineApp.Extensions
             services.AddSingleton<IGrapeColourMapper, GrapeColourMapper>();
             services.AddSingleton<IStopperTypeMapper, StopperTypeMapper>();
             services.AddSingleton<IDrinkerMapper, DrinkerMapper>();
+            services.AddSingleton<IRetailerMapper, RetailerMapper>();
         }
     }
 }
