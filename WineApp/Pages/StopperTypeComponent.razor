@@ -376,7 +376,14 @@
     {
         try
         {
-            await StopperTypeService.Delete(deleteStopperId).ConfigureAwait(false);
+            var result = await StopperTypeService.Delete(deleteStopperId).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = $"There was an error deleting the record. The error is: {result.Error}";
+                deleteError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
 
             Messenger.AddInformation(title: "Success", message: $"Stopper Type '{deleteStopperTypeName}' deleted successfully.");
 

@@ -371,7 +371,14 @@
     {
         try
         {
-            await GrapeColourService.Delete(deleteColourId).ConfigureAwait(false);
+            var result = await GrapeColourService.Delete(deleteColourId).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = $"There was an error deleting the record. The error is: {result.Error}";
+                deleteError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
 
             Messenger.AddInformation(title: "Success", message: $"Grape Colour '{deleteGrapeColour}' deleted successfully.");
 
