@@ -91,7 +91,7 @@
         {
             <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
         }
-        <p>Are you sure you wish to delete the drinker '@deleteDrinker'?</p>
+        <p>Are you sure you wish to delete the drinker '@deleteDrinkerName'?</p>
         <p>This action cannot be undone.</p>
         <div class="modal-footer">
             <table>
@@ -249,6 +249,7 @@
 
     private async void ShowDeleteModal(Drinker value)
     {
+        deleteDrinkerId = value.Id;
         deleteDrinkerName = value.Name;
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
@@ -324,6 +325,9 @@
 
     private async Task CloseDeleteModal()
     {
+        deleteError = false;
+        errorString = string.Empty;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         await deleteDrinker.HideAsync().ConfigureAwait(false);
     }
 
@@ -357,7 +361,14 @@
     {
         try
         {
-            await DrinkerService.Delete(deleteDrinkerId).ConfigureAwait(false);
+            var result =  await DrinkerService.Delete(deleteDrinkerId).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = $"There was an error deleting the record. The error is: {result.Error}";
+                deleteError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
 
             Messenger.AddInformation(title: "Success", message: $"Drinker '{deleteDrinkerName}' deleted successfully.");
 
@@ -371,7 +382,7 @@
         }
         catch (Exception)
         {
-            errorString = $"There was an error deleting the grape colour";
+            errorString = $"There was an error deleting the drinker";
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
     }
