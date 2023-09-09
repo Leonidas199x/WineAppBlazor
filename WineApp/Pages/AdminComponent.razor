@@ -11,7 +11,7 @@
                 <HeaderTemplate>Countries</HeaderTemplate>
                 <BodyTemplate>
                     <HxCardTitle>Add, edit or delete countries</HxCardTitle>
-                    <HxButton Color="ThemeColor.Primary" OnClick="@ViewCountries"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@(() => View("Countries"))"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
                 </BodyTemplate>
             </HxCard>
         </td>
@@ -20,7 +20,7 @@
                 <HeaderTemplate>Grapes</HeaderTemplate>
                 <BodyTemplate>
                     <HxCardTitle>Add, edit or delete grapes</HxCardTitle>
-                    <HxButton Color="ThemeColor.Primary" OnClick="@ViewGrapes"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@(() => View("Grapes"))"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
                 </BodyTemplate>
             </HxCard>
         </td>
@@ -29,7 +29,7 @@
                 <HeaderTemplate>Grape Colours</HeaderTemplate>
                 <BodyTemplate>
                     <HxCardTitle>Add, edit or delete grape colours</HxCardTitle>
-                    <HxButton Color="ThemeColor.Primary" OnClick="@ViewGrapeColours"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@(() => View("GrapeColours"))"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
                 </BodyTemplate>
             </HxCard>
         </td>
@@ -40,7 +40,16 @@
                 <HeaderTemplate>Stopper Types</HeaderTemplate>
                 <BodyTemplate>
                     <HxCardTitle>Add, edit or delete stopper types</HxCardTitle>
-                    <HxButton Color="ThemeColor.Primary" OnClick="@ViewStopperTypes"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@(() => View("StopperTypes"))"><HxIcon Icon="@BootstrapIcon.WrenchAdjustableCircle" /></HxButton>
+                </BodyTemplate>
+            </HxCard>
+        </td>
+        <td class="index-card">
+            <HxCard>
+                <HeaderTemplate>Drinkers</HeaderTemplate>
+                <BodyTemplate>
+                    <HxCardTitle>Add, edit or delete drinkers</HxCardTitle>
+                    <HxButton Color="ThemeColor.Primary" OnClick="@(() => View("Drinkers"))"><HxIcon Icon="@BootstrapIcon.Cup" /></HxButton>
                 </BodyTemplate>
             </HxCard>
         </td>
@@ -48,23 +57,8 @@
 </table>
 
 @code {
-    private void ViewCountries()
+    private void View(string entity)
     {
-        NavigationManager.NavigateTo("/Countries");
-    }
-
-    private void ViewGrapes()
-    {
-        NavigationManager.NavigateTo("/Grapes");
-    }
-
-    private void ViewGrapeColours()
-    {
-        NavigationManager.NavigateTo("/GrapeColours");
-    }
-
-    private void ViewStopperTypes()
-    {
-        NavigationManager.NavigateTo("/StopperTypes");
+        NavigationManager.NavigateTo($"/{entity}");
     }
 }
