@@ -11,7 +11,13 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <HxDropdownButtonGroup>
+                <HxDropdownToggleButton Color="ThemeColor.Secondary"><HxIcon Icon="BootstrapIcon.CloudMoon"/></HxDropdownToggleButton>
+                <HxDropdownMenu>
+                    <HxDropdownItem><HxIcon Icon="BootstrapIcon.Moon" /> Dark</HxDropdownItem>
+                    <HxDropdownItem><HxIcon Icon="BootstrapIcon.Sun" /> Light</HxDropdownItem>
+                </HxDropdownMenu>
+            </HxDropdownButtonGroup>
         </div>
 
         <article class="content px-4">
