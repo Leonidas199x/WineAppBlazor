@@ -1,0 +1,390 @@
+﻿@inject WineApp.Domain.Drinker.IDrinkerService DrinkerService
+@inject IDrinkerMapper DrinkerMapper
+
+@page "/Drinkers"
+S
+<h3>Drinkers</h3>
+
+<HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
+<HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+
+<HxOffcanvas @ref="filter" Title="Filter">
+    <BodyTemplate>
+        <HxInputText LabelType="LabelType.Floating"
+                     ValidationMessageMode="ValidationMessageMode.None"
+        @bind-Value="@filterName"
+                     Label="Colour" />
+        <hr />
+        <HxButton OnClick="Filter"
+                  Text="Search"
+                  Color="ThemeColor.Secondary" />
+        <HxButton OnClick="ClearFilter"
+                  Text="Clear"
+                  Color="ThemeColor.Dark" />
+    </BodyTemplate>
+</HxOffcanvas>
+
+@if (gridError)
+{
+    <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
+}
+
+@if (!isSearch)
+{
+    <HxGrid @ref="dataGrid"
+            TItem="Drinker"
+            Responsive="true"
+            DataProvider="GetGridData"
+            PageSize="10"
+            Striped="true">
+        <Columns>
+            <HxGridColumn HeaderText="Name"
+                          ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(Drinker.Name)"
+                          IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Dark"
+                          OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+@if (isSearch)
+{
+    <HxGrid @ref="searchGrid"
+            TItem="Drinker"
+            Responsive="true"
+            DataProvider="GetSearchData"
+            PageSize="10"
+            Striped="true">
+        <Columns>
+            <HxGridColumn HeaderText="Colour"
+                          ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(Drinker.Name)"
+                          IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Dark"
+                          OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+<HxModal @ref="deleteDrinker"
+         Size="ModalSize.Regular"
+         Title="Delete Drinker">
+    <BodyTemplate>
+        @if (deleteError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <p>Are you sure you wish to delete the drinker '@deleteDrinker'?</p>
+        <p>This action cannot be undone.</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
+                    </td>
+                    <td>
+                        <HxButton Text="Cancel" Color="ThemeColor.Dark" OnClick="CloseDeleteModal" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </BodyTemplate>
+
+</HxModal>
+<HxModal @ref="editDrinker"
+         Size="ModalSize.Large"
+         Title="Edit Drinker">
+    <BodyTemplate>
+        @if (editError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <EditForm Model="@editableDrinker"
+                  OnValidSubmit=@Save>
+            <DataAnnotationsValidator />
+            <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableDrinker.Name" Label="Name" />
+            <div class="modal-footer">
+                <table>
+                    <tr>
+                        <td>
+                            <HxSubmit Text="Save" Color="ThemeColor.Primary" />
+                        </td>
+                        <td>
+                            <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </EditForm>
+    </BodyTemplate>
+</HxModal>
+
+@code {
+    [Inject] protected IHxMessengerService Messenger { get; set; }
+
+    bool gridError = false;
+    bool editError = false;
+    bool deleteError = false;
+    bool saveError = false;
+    bool isEdit = false;
+    bool isSearch = false;
+    int TotalPages = 0;
+    int resultsPerPage = 10;
+    string errorString = string.Empty;
+    private HxModal editDrinker = new HxModal();
+    private HxModal deleteDrinker = new HxModal();
+    private HxOffcanvas filter;
+    DrinkerViewModel editableDrinker;
+    EditContext editContext;
+    string filterName = string.Empty;
+    private HxGrid<Drinker> dataGrid = new HxGrid<Drinker>();
+    private HxGrid<Drinker> searchGrid = new HxGrid<Drinker>();
+    string deleteDrinkerName = string.Empty;
+    int deleteDrinkerId;
+
+    private async Task<GridDataProviderResult<Drinker>> GetGridData(GridDataProviderRequest<Drinker> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await DrinkerService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Drinker>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<Drinker>();
+        }
+
+    }
+
+    private async Task<GridDataProviderResult<Drinker>> GetSearchData(GridDataProviderRequest<Drinker> request)
+    {
+        try
+        {
+            isSearch = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await DrinkerService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Drinker>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<Drinker>();
+        }
+
+    }
+
+    private async void ShowEditModal(Drinker value)
+    {
+        try
+        {
+            await SetEdit(true).ConfigureAwait(false);
+            await ClearEditError().ConfigureAwait(false);
+
+            var result = await DrinkerService.Get(value.Id).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                editError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            editableDrinker = DrinkerMapper.Map(result.Data);
+
+            await InvokeAsync(editDrinker.ShowAsync).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            editError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async void ShowDeleteModal(Drinker value)
+    {
+        deleteDrinkerName = value.Name;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(deleteDrinker.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            var result = (isEdit)
+                        ? await SaveEdit().ConfigureAwait(false)
+                        : await SaveNew().ConfigureAwait(false);
+
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await ShowEditError().ConfigureAwait(false);
+                return;
+            }
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
+
+            Messenger.AddInformation(title: "Success", message: $"Drinker '{editableDrinker.Name}' saved successfully.");
+            await CloseEditModal();
+        }
+        catch (Exception)
+        {
+            await ShowEditError().ConfigureAwait(false);
+        }
+    }
+
+    private async Task<Result> SaveEdit()
+    {
+        var drinker = DrinkerMapper.Map(editableDrinker);
+
+        return await DrinkerService.Put(drinker).ConfigureAwait(false);
+    }
+
+    private async Task<Result> SaveNew()
+    {
+        var drinker = DrinkerMapper.MapNew(editableDrinker);
+
+        return await DrinkerService.Post(drinker).ConfigureAwait(false);
+    }
+
+    private async Task ShowCreateModal()
+    {
+        await SetEdit(false).ConfigureAwait(false);
+        await ClearEditError().ConfigureAwait(false);
+        editableDrinker = new DrinkerViewModel();
+
+        await InvokeAsync(editDrinker.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task ShowEditError()
+    {
+        editError = true;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearEditError()
+    {
+        editError = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CloseEditModal()
+    {
+        await editDrinker.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task CloseDeleteModal()
+    {
+        await deleteDrinker.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task SetEdit(bool value)
+    {
+        isEdit = value;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task FilterOpen()
+    {
+        await filter.ShowAsync();
+    }
+
+    private async Task Filter()
+    {
+        isSearch = true;
+        await searchGrid.RefreshDataAsync().ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearFilter()
+    {
+        isSearch = false;
+        filterName = string.Empty;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            await DrinkerService.Delete(deleteDrinkerId).ConfigureAwait(false);
+
+            Messenger.AddInformation(title: "Success", message: $"Drinker '{deleteDrinkerName}' deleted successfully.");
+
+            deleteDrinkerId = default;
+            deleteDrinkerName = string.Empty;
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
+
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await CloseDeleteModal().ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            errorString = $"There was an error deleting the grape colour";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async Task RefreshGrid(bool isSearch)
+    {
+        if (isSearch)
+        {
+            await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+
+            return;
+        }
+
+        await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+    }
+}
