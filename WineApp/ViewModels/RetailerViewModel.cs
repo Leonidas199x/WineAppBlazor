@@ -24,7 +24,7 @@ namespace WineApp.ViewModels
         public string GenericDiscountName { get; set; } = string.Empty;
 
         [DisplayName("Website")]
-        public Uri WebsiteUrl { get; set; }
+        public string WebsiteUrl { get; set; } = string.Empty;
 
         [DisplayName("Website Rating")]
         public int? WebsiteRating { get; set; }
