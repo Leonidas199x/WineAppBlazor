@@ -402,9 +402,9 @@
 
     private async Task<Result> SaveNew()
     {
-        var stopperType = RetailerMapper.MapNew(editableRetailer);
+        var retailer = RetailerMapper.MapNew(editableRetailer);
 
-        return await RetailerService.Post(stopperType).ConfigureAwait(false);
+        return await RetailerService.Post(retailer).ConfigureAwait(false);
     }
 
     private async Task ShowCreateModal()
@@ -478,7 +478,7 @@
                 return;
             }
 
-            Messenger.AddInformation(title: "Success", message: $"Stopper Type '{deleteRetailerName}' deleted successfully.");
+            Messenger.AddInformation(title: "Success", message: $"Retailer '{deleteRetailerName}' deleted successfully.");
 
             deleteRetailerId = default;
             deleteRetailerName = string.Empty;
@@ -490,7 +490,7 @@
         }
         catch (Exception)
         {
-            errorString = $"There was an error deleting the stopper type";
+            errorString = $"There was an error deleting the retailer";
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
     }
