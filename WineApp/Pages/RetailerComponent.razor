@@ -1,0 +1,509 @@
+﻿@inject WineApp.Domain.Retailer.IRetailerService RetailerService
+@inject IRetailerMapper RetailerMapper
+
+@page "/Retailers"
+
+<h3><HxIcon Icon="BootstrapIcon.Shop" CssClass="page-icon" />Retailers</h3>
+
+<HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
+<HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+
+<HxOffcanvas @ref="filter" Title="Filter">
+    <BodyTemplate>
+        <HxInputText 
+            LabelType="LabelType.Floating"
+            ValidationMessageMode="ValidationMessageMode.None"
+            @bind-Value="@filterName"
+                     Label="Name" />
+        <hr />
+        <HxButton OnClick="Filter"
+                  Text="Search"
+                  Color="ThemeColor.Secondary" />
+        <HxButton OnClick="ClearFilter"
+                  Text="Clear"
+                  Color="ThemeColor.Dark" />
+    </BodyTemplate>
+</HxOffcanvas>
+
+@if (gridError)
+{
+    <div class="spacer" />
+    <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
+}
+
+@if (!isSearch)
+{
+    <HxGrid @ref="dataGrid"
+            TItem="Retailer"
+            Responsive="true"
+            DataProvider="GetGridData"
+            PageSize="10"
+            Striped="true">
+        <Columns>
+            <HxGridColumn HeaderText="Name"
+                          ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(Retailer.Name)"
+                          IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Dark"
+                          OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+@if (isSearch)
+{
+    <HxGrid @ref="searchGrid"
+            TItem="Retailer"
+            Responsive="true"
+            DataProvider="GetSearchData"
+            PageSize="10"
+            Striped="true">
+        <Columns>
+            <HxGridColumn HeaderText="Colour"
+                          ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(Retailer.Name)"
+                          IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Dark"
+                          OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+<HxModal @ref="deleteRetailer"
+         Size="ModalSize.Regular"
+         Title="Delete Retailer">
+    <BodyTemplate>
+        @if (deleteError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <p>Are you sure you wish to delete the retailer '@deleteRetailerName'?</p>
+        <p>This action cannot be undone.</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
+                    </td>
+                    <td>
+                        <HxButton Text="Cancel" Color="ThemeColor.Dark" OnClick="CloseDeleteModal" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </BodyTemplate>
+
+</HxModal>
+<HxModal @ref="editRetailer"
+         Size="ModalSize.Large"
+         Title="@modalText">
+    <BodyTemplate>
+        @if (editError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <HxTabPanel 
+            InitialActiveTabId="retailer-details"
+            NavVariant="NavVariant.Tabs">
+	        <HxTab
+                Id="retailer-details"
+                Title="Details">
+                <Content>
+                    <EditForm 
+                        Model="@editableRetailer"
+                        OnValidSubmit=@Save>
+                        <DataAnnotationsValidator />
+                        <HxInputText 
+                            LabelType="LabelType.Floating" 
+                            ValidationMessageMode="ValidationMessageMode.None" 
+                            @bind-Value="@editableRetailer.Name" 
+                            Label="Name" />
+                        <HxInputNumber
+                            LabelType="LabelType.Floating"
+                            @bind-Value="@editableRetailer.MinimumPurchaseQuantity"
+                            Label="Minimum Purchase Quantity" />
+                        <HxInputNumber 
+                            LabelType="LabelType.Floating"
+                            @bind-Value="@editableRetailer.IncrementQuantity"
+                            Label="Increment Quantity" />
+                        <HxInputText 
+                            LabelType="LabelType.Floating"
+                            ValidationMessageMode="ValidationMessageMode.None"
+                            @bind-Value="@editableRetailer.GenericDiscountName"
+                             Label="Generic Discount Name" />
+                        <HxInputNumber 
+                            Label="Generic Discount" 
+                            @bind-Value="@editableRetailer.GenericDiscountPercentage">
+                            <InputGroupStartTemplate>
+                                <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Percent" />
+                            </InputGroupStartTemplate>
+                        </HxInputNumber>
+                        <HxInputText 
+                            LabelType="LabelType.Floating"
+                            ValidationMessageMode="ValidationMessageMode.None"
+                            @bind-Value="@editableRetailer.WebsiteUrl"
+                             Label="Website" />
+                        <div class="modal-footer">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <HxSubmit Text="Save" Color="ThemeColor.Primary" />
+                                    </td>
+                                    <td>
+                                        <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </EditForm>
+                </Content>
+            </HxTab>
+            <HxTab
+                Id="retailer-ratings"
+                Title="Rating">
+                <Content>
+                    <EditForm 
+                        Model="@editableRetailer"
+                        OnValidSubmit=@Save>
+                        <HxInputNumber
+                            LabelType="LabelType.Floating"
+                            @bind-Value="@editableRetailer.WebsiteRating"
+                            Label="Website" />
+                         <HxInputNumber
+                            LabelType="LabelType.Floating"
+                            @bind-Value="@editableRetailer.OrderRating"
+                            Label="Order" />
+                         <HxInputNumber
+                            LabelType="LabelType.Floating"
+                            @bind-Value="@editableRetailer.DeliveryRating"
+                            Label="Delivery" />
+                         <HxInputNumber
+                            LabelType="LabelType.Floating"
+                            @bind-Value="@editableRetailer.MaxCustomerRating"
+                            Label="Max Customer" />
+                        <div class="modal-footer">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <HxSubmit Text="Save" Color="ThemeColor.Primary" />
+                                    </td>
+                                    <td>
+                                        <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </EditForm>
+                </Content>
+            </HxTab>
+            <HxTab 
+                Id="retailer-note"
+                Title="Note">
+                <Content>
+                    <EditForm
+                        Model="@editableRetailer"
+                        OnValidSubmit=@Save>
+                        <HxInputTextArea 
+                            LabelType="LabelType.Floating"
+                            @bind-Value="@editableRetailer.Note"
+                            Label="Note">
+                        </HxInputTextArea>
+                        <div class="modal-footer">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <HxSubmit Text="Save" Color="ThemeColor.Primary" />
+                                    </td>
+                                    <td>
+                                        <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </EditForm>
+                </Content>
+            </HxTab>
+        </HxTabPanel>
+    </BodyTemplate>
+</HxModal>
+
+@code {
+    [Inject] protected IHxMessengerService Messenger { get; set; }
+
+    bool gridError = false;
+    bool editError = false;
+    bool deleteError = false;
+    bool saveError = false;
+    bool isEdit = false;
+    bool isSearch = false;
+    int TotalPages = 0;
+    int resultsPerPage = 10;
+    string errorString = string.Empty;
+    private HxModal editRetailer = new HxModal();
+    private HxModal deleteRetailer = new HxModal();
+    private HxOffcanvas filter;
+    RetailerViewModel editableRetailer;
+    EditContext editContext;
+    string filterName = string.Empty;
+    private HxGrid<Retailer> dataGrid = new HxGrid<Retailer>();
+    private HxGrid<Retailer> searchGrid = new HxGrid<Retailer>();
+    string deleteRetailerName = string.Empty;
+    int deleteRetailerId;
+    string modalText = string.Empty;
+
+    private async Task<GridDataProviderResult<Retailer>> GetGridData(GridDataProviderRequest<Retailer> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await RetailerService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Retailer>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<Retailer>();
+        }
+
+    }
+
+    private async Task<GridDataProviderResult<Retailer>> GetSearchData(GridDataProviderRequest<Retailer> request)
+    {
+        try
+        {
+            isSearch = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await RetailerService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Retailer>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<Retailer>();
+        }
+
+    }
+
+    private async void ShowEditModal(Retailer value)
+    {
+        try
+        {
+            modalText = "Edit Retailer";
+            await SetEdit(true).ConfigureAwait(false);
+            await ClearEditError().ConfigureAwait(false);
+
+            var result = await RetailerService.Get(value.Id).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                editError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            editableRetailer = RetailerMapper.Map(result.Data);
+
+            await InvokeAsync(editRetailer.ShowAsync).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            editError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async void ShowDeleteModal(Retailer value)
+    {
+        deleteRetailerId = value.Id;
+        deleteRetailerName = value.Name;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(deleteRetailer.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            var result = (isEdit)
+                        ? await SaveEdit().ConfigureAwait(false)
+                        : await SaveNew().ConfigureAwait(false);
+
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await ShowEditError().ConfigureAwait(false);
+                return;
+            }
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
+
+            Messenger.AddInformation(title: "Success", message: $"Retailer '{editableRetailer.Name}' saved successfully.");
+
+            await CloseEditModal();
+        }
+        catch (Exception)
+        {
+            await ShowEditError().ConfigureAwait(false);
+        }
+    }
+
+    private async Task<Result> SaveEdit()
+    {
+        var colour = RetailerMapper.Map(editableRetailer);
+
+        return await RetailerService.Put(colour).ConfigureAwait(false);
+    }
+
+    private async Task<Result> SaveNew()
+    {
+        var stopperType = RetailerMapper.MapNew(editableRetailer);
+
+        return await RetailerService.Post(stopperType).ConfigureAwait(false);
+    }
+
+    private async Task ShowCreateModal()
+    {
+        modalText = "Add Retailer";
+        await SetEdit(false).ConfigureAwait(false);
+        await ClearEditError().ConfigureAwait(false);
+        editableRetailer = new RetailerViewModel();
+
+        await InvokeAsync(editRetailer.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task ShowEditError()
+    {
+        editError = true;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearEditError()
+    {
+        editError = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CloseEditModal()
+    {
+        await editRetailer.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task CloseDeleteModal()
+    {
+        await deleteRetailer.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task SetEdit(bool value)
+    {
+        isEdit = value;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task FilterOpen()
+    {
+        await filter.ShowAsync();
+    }
+
+    private async Task Filter()
+    {
+        isSearch = true;
+        await searchGrid.RefreshDataAsync().ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearFilter()
+    {
+        isSearch = false;
+        filterName = string.Empty;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            var result = await RetailerService.Delete(deleteRetailerId).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = $"There was an error deleting the record. The error is: {result.Error}";
+                deleteError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            Messenger.AddInformation(title: "Success", message: $"Stopper Type '{deleteRetailerName}' deleted successfully.");
+
+            deleteRetailerId = default;
+            deleteRetailerName = string.Empty;
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
+
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await CloseDeleteModal().ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            errorString = $"There was an error deleting the stopper type";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async Task RefreshGrid(bool isSearch)
+    {
+        if (isSearch)
+        {
+            await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+
+            return;
+        }
+
+        await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+    }
+}
