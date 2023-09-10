@@ -1,0 +1,466 @@
+﻿@inject WineApp.Domain.Region.IRegionService RegionService
+@inject WineApp.Domain.Countries.ICountryService CountryService
+@inject IRegionMapper RegionMapper
+
+@page "/Regions"
+
+<h3><HxIcon Icon="BootstrapIcon.MapFill" CssClass="page-icon" />Regions</h3>
+
+<HxButton Color="ThemeColor.Primary" OnClick="@ShowCreateModal" Icon="@BootstrapIcon.Plus" />
+<HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+
+<HxOffcanvas @ref="filter" Title="Filter">
+    <BodyTemplate>
+        <HxInputText 
+            LabelType="LabelType.Floating"
+            ValidationMessageMode="ValidationMessageMode.None"
+            @bind-Value="@filterName"
+            Label="Region" />
+        <hr />
+        <HxButton 
+            OnClick="Filter"
+            Text="Search"
+            Color="ThemeColor.Secondary" />
+        <HxButton 
+            OnClick="ClearFilter"
+            Text="Clear"
+            Color="ThemeColor.Secondary" />
+    </BodyTemplate>
+</HxOffcanvas>
+
+@if (gridError)
+{
+    <div class="spacer" />
+    <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
+}
+
+@if (!isSearch)
+{
+    <HxGrid 
+        @ref="dataGrid"
+        TItem="Region"
+        Responsive="true"
+        DataProvider="GetGridData"
+        PageSize="10"
+        Striped="true">
+        <Columns>
+            <HxGridColumn 
+                HeaderText="Region"
+                ItemTextSelector="@(item => item.Name)"
+                SortString="@nameof(Region.Name)"
+                IsDefaultSortColumn="true" />
+            <HxGridColumn 
+                HeaderText="Country"
+                ItemTextSelector="@(item => item.Country.Name)"
+                SortString="@nameof(Region.Country.Name)"
+                IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Dark"
+                          OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+@if (isSearch)
+{
+    <HxGrid @ref="searchGrid"
+            TItem="Region"
+            Responsive="true"
+            DataProvider="GetSearchData"
+            PageSize="10"
+            Striped="true">
+        <Columns>
+            <HxGridColumn 
+                HeaderText="Region"
+                ItemTextSelector="@(item => item.Name)"
+                SortString="@nameof(Region.Name)"
+                IsDefaultSortColumn="true" />
+            <HxGridColumn
+                    HeaderText="Country"
+                    ItemTextSelector="@(item => item.Country.Name)"
+                    SortString="@nameof(Region.Country.Name)"
+                    IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Dark"
+                          OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+<HxModal @ref="deleteRegion"
+         Size="ModalSize.Regular"
+         Title="Delete Region">
+    <BodyTemplate>
+        @if (deleteError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <p>Are you sure you wish to delete the region '@deleteRegionName'?</p>
+        <p>This action cannot be undone.</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
+                    </td>
+                    <td>
+                        <HxButton Text="Cancel" Color="ThemeColor.Dark" OnClick="CloseDeleteModal" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </BodyTemplate>
+
+</HxModal>
+<HxModal @ref="editRegion"
+         Size="ModalSize.Large"
+         Title="@modalText">
+    <BodyTemplate>
+        @if (editError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <HxTabPanel
+            InitialActiveTabId="region-details"
+            NavVariant="NavVariant.Tabs">
+            <HxTab 
+                Id="region-details"
+                Title="Details">
+                <Content>
+                    <EditForm 
+                        Model="@editableRegion" 
+                        OnValidSubmit="@Save">
+                        <DataAnnotationsValidator />
+                        <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableRegion.Name" Label="Name" />
+                        <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableRegion.IsoCode" Label="ISO Code" />
+                        <HxSelect 
+                            TItem="CountryLookup"
+                            TValue="int"
+                            Label="Country"
+                            Data="@countries"
+                            @bind-Value="@editableRegion.Country.Id"
+                            TextSelector="@(p => p.Name)"
+                            ValueSelector="@(p => p.Id)"
+                            Nullable="true"
+                            NullDataText="Loading Countries..." />
+                        <div class="modal-footer">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <HxSubmit Text="Save" Color="ThemeColor.Primary" />
+                                    </td>
+                                    <td>
+                                        <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </EditForm>
+                </Content>
+            </HxTab>
+            <HxTab
+                Id="region-map"
+                Title="Map">
+                <Content>
+
+                </Content>
+            </HxTab>
+        </HxTabPanel>
+    </BodyTemplate>
+</HxModal>
+
+@code {
+    [Inject] protected IHxMessengerService Messenger { get; set; }
+
+    bool gridError = false;
+    bool editError = false;
+    bool deleteError = false;
+    bool saveError = false;
+    bool isEdit = false;
+    bool isSearch = false;
+    int TotalPages = 0;
+    int resultsPerPage = 10;
+    string errorString = string.Empty;
+    private HxModal editRegion = new HxModal();
+    private HxModal deleteRegion = new HxModal();
+    private HxOffcanvas filter;
+    RegionViewModel editableRegion;
+    EditContext editContext;
+    string filterName = string.Empty;
+    private HxGrid<Region> dataGrid = new HxGrid<Region>();
+    private HxGrid<Region> searchGrid = new HxGrid<Region>();
+    string deleteRegionName = string.Empty;
+    int deleteRegionId;
+    string modalText = string.Empty;
+    IEnumerable<CountryLookup> countries = null;
+
+    private async Task<GridDataProviderResult<Region>> GetGridData(GridDataProviderRequest<Region> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await RegionService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Region>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<Region>();
+        }
+
+    }
+
+    private async Task<GridDataProviderResult<Region>> GetSearchData(GridDataProviderRequest<Region> request)
+    {
+        try
+        {
+            isSearch = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await RegionService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Region>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<Region>();
+        }
+
+    }
+
+    private async void ShowEditModal(Region value)
+    {
+        try
+        {
+            modalText = "Edit Region";
+            await SetEdit(true).ConfigureAwait(false);
+            await ClearEditError().ConfigureAwait(false);
+            await SetCountries().ConfigureAwait(false);
+
+            var result = await RegionService.Get(value.Id).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                editError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            editableRegion = RegionMapper.Map(result.Data);
+
+            await InvokeAsync(editRegion.ShowAsync).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            editError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async void ShowDeleteModal(Region value)
+    {
+        deleteRegionId = value.Id;
+        deleteRegionName = value.Name;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(deleteRegion.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            var result = (isEdit)
+                        ? await SaveEdit().ConfigureAwait(false)
+                        : await SaveNew().ConfigureAwait(false);
+
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await ShowEditError().ConfigureAwait(false);
+                return;
+            }
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
+
+            Messenger.AddInformation(title: "Success", message: $"Region '{editableRegion.Name}' saved successfully.");
+
+            await CloseEditModal();
+        }
+        catch (Exception)
+        {
+            await ShowEditError().ConfigureAwait(false);
+        }
+    }
+
+    private async Task<Result> SaveEdit()
+    {
+        var colour = RegionMapper.Map(editableRegion);
+
+        return await RegionService.Put(colour).ConfigureAwait(false);
+    }
+
+    private async Task<Result> SaveNew()
+    {
+        var region = RegionMapper.MapNew(editableRegion);
+
+        return await RegionService.Post(region).ConfigureAwait(false);
+    }
+
+    private async Task ShowCreateModal()
+    {
+        modalText = "Add Region";
+        await SetEdit(false).ConfigureAwait(false);
+        await ClearEditError().ConfigureAwait(false);
+        await SetCountries().ConfigureAwait(false);
+        editableRegion = new RegionViewModel();
+        editableRegion.Country = new CountryViewModel();
+
+        await InvokeAsync(editRegion.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task SetCountries()
+    {
+        var countriesResult = await CountryService.GetLookup().ConfigureAwait(false);
+        if (!countriesResult.IsSuccess)
+        {
+            editError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
+        countries = countriesResult.Data;
+    }
+
+    private async Task ShowEditError()
+    {
+        editError = true;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearEditError()
+    {
+        editError = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CloseEditModal()
+    {
+        await editRegion.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task CloseDeleteModal()
+    {
+        await deleteRegion.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task SetEdit(bool value)
+    {
+        isEdit = value;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task FilterOpen()
+    {
+        await filter.ShowAsync();
+    }
+
+    private async Task Filter()
+    {
+        isSearch = true;
+        await searchGrid.RefreshDataAsync().ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearFilter()
+    {
+        isSearch = false;
+        filterName = string.Empty;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            var result = await RegionService.Delete(deleteRegionId).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = $"There was an error deleting the record. The error is: {result.Error}";
+                deleteError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            Messenger.AddInformation(title: "Success", message: $"Region '{deleteRegionName}' deleted successfully.");
+
+            deleteRegionId = default;
+            deleteRegionName = string.Empty;
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
+
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await CloseDeleteModal().ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            errorString = $"There was an error deleting the region";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async Task RefreshGrid(bool isSearch)
+    {
+        if (isSearch)
+        {
+            await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+
+            return;
+        }
+
+        await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+    }
+}
