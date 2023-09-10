@@ -41,17 +41,17 @@ namespace WineApp.Domain.Region
                 .ConfigureAwait(false);
         }
 
-        public async Task<Result> Put(DataContract.Region Region)
+        public async Task<Result> Put(DataContract.Region region)
         {
-            var json = JsonConvert.SerializeObject(Region);
+            var json = JsonConvert.SerializeObject(region);
             return await _request
                     .PutAsync(_endpoint, json)
                     .ConfigureAwait(false);
         }
 
-        public async Task<Result> Post(DataContract.Region Region)
+        public async Task<Result> Post(RegionCreate region)
         {
-            var json = JsonConvert.SerializeObject(Region);
+            var json = JsonConvert.SerializeObject(region);
 
             return await _request
                     .PostAsync(_endpoint, json)

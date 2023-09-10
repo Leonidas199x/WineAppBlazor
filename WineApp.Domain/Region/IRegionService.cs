@@ -10,9 +10,9 @@ namespace WineApp.Domain.Region
 
         Task<Result<DataContract.Region>> Get(int id);
 
-        Task<Result> Put(DataContract.Region grapeColour);
+        Task<Result> Put(DataContract.Region region);
 
-        Task<Result> Post(DataContract.Region grapeColour);
+        Task<Result> Post(RegionCreate region);
 
         Task<Result> Delete(int id);
     }
