@@ -10,6 +10,8 @@ namespace WineApp.Domain.Countries
 
         public Task<Result<Country>> Get(int id);
 
+        Task<Result<IEnumerable<CountryLookup>>> GetLookup();
+
         Task<Result> Put(Country country);
 
         Task<Result> Post(CountryInbound country);

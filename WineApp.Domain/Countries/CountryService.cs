@@ -32,6 +32,30 @@ namespace WineApp.Domain.Countries
                 .ConfigureAwait(false);
         }
 
+        public async Task<Result<IEnumerable<CountryLookup>>> GetLookup()
+        {
+            var url = $"{_endpoint}/Lookup";
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            var countries = await _request
+                .SendAsync<IEnumerable<CountryLookup>>(request) 
+                .ConfigureAwait(false);
+
+            var zeroCountry = new CountryLookup
+            {
+                Id = 0,
+                Name = string.Empty,
+            };
+
+            var list = countries.Data.ToList();
+
+            list.Add(zeroCountry);
+
+            countries.Data = list;
+
+            return countries;
+        }
+
         public async Task<Result<Country>> Get(int id)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{_endpoint}/{id}");
