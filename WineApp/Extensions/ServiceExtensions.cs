@@ -5,6 +5,7 @@ using WineApp.Domain.StopperType;
 using WineApp.Domain;
 using WineApp.Mappers;
 using WineApp.Domain.Retailer;
+using WineApp.Domain.Region;
 
 namespace WineApp.Extensions
 {
@@ -18,6 +19,7 @@ namespace WineApp.Extensions
             services.AddTransient<IStopperTypeService, StopperTypeService>();
             services.AddTransient<IDrinkerService, DrinkerService>();
             services.AddTransient<IRetailerService, RetailerService>();
+            services.AddTransient<IRegionService, RegionService>();
         }
 
         public static void RegisterUserMappers(this IServiceCollection services) 
@@ -27,6 +29,7 @@ namespace WineApp.Extensions
             services.AddSingleton<IStopperTypeMapper, StopperTypeMapper>();
             services.AddSingleton<IDrinkerMapper, DrinkerMapper>();
             services.AddSingleton<IRetailerMapper, RetailerMapper>();
+            services.AddSingleton<IRegionMapper, RegionMapper>();
         }
     }
 }
