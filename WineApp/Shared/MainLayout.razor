@@ -30,6 +30,6 @@
 @code {
     private async Task SetTheme(string theme)
     {
-        await JS.InvokeAsync<string>("setTheme", theme);
+        await JS.InvokeVoidAsync("setTheme", theme);
     }
 }

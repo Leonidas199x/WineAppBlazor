@@ -136,11 +136,13 @@
         }
         <HxTabPanel
             InitialActiveTabId="region-details"
-            NavVariant="NavVariant.Tabs">
+            NavVariant="NavVariant.Tabs"
+            RenderMode="TabPanelRenderMode.ActiveTabOnly">
             <HxTab 
                 Id="region-details"
                 Title="Details">
                 <Content>
+                    <div class="spacer" />
                     <EditForm 
                         Model="@editableRegion" 
                         OnValidSubmit="@Save">
@@ -176,7 +178,7 @@
                 Id="region-map"
                 Title="Map">
                 <Content>
-
+                    <MapComponent Region="@editableRegion.Name"></MapComponent>
                 </Content>
             </HxTab>
         </HxTabPanel>
@@ -293,7 +295,7 @@
         }
         catch (Exception)
         {
-            editError = true;
+            gridError = true;
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
     }

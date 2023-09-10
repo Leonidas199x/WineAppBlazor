@@ -4,6 +4,6 @@
     {
         public const string WineApi = "WineApi";
 
-        public const string MapBoxApi = "MapBoxApi";
+        public const string BingMaps = "BingMaps";
     }
 }

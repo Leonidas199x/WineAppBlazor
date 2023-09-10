@@ -108,3 +108,10 @@ a, .btn-link {
 .spacer {
     margin-bottom: 10px;
 }
+
+#myMap {
+    position: center;
+    width: 600px;
+    height: 400px;
+    margin: auto;
+}
