@@ -1,12 +1,18 @@
 ﻿@inject WineApp.Domain.Maps.IMapsService MapsService
 
+<div class="spacer"></div>
 @if (isLoading)
 {
     <div class="center-loading">
         <LoadingComponent />
     </div>
 }
-<div class="spacer"></div>
+
+@if (noMap)
+{
+    <HxAlert Color="ThemeColor.Warning">@NoMapText</HxAlert>
+}
+
 <div id="myMap"></div>
 
 
@@ -15,15 +21,29 @@
     public string Region { get; set; } = string.Empty;
 
     bool isLoading = true;
+    bool noMap = false;
+    string NoMapText = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
-        var mapDetails = await MapsService.GetRegionInfo(Region).ConfigureAwait(false);
-        var coordinates = mapDetails.Data.resourceSets.First().resources.First().point.coordinates;
-        var latitude = coordinates[0];
-        var longitude = coordinates[1];
+        try
+        {
+            var mapDetails = await MapsService.GetRegionInfo(Region).ConfigureAwait(false);
+            var coordinates = mapDetails.Data.resourceSets.First().resources.First().point.coordinates;
+            var latitude = coordinates[0];
+            var longitude = coordinates[1];
 
-        await JS.InvokeVoidAsync($"getMap", latitude, longitude, Region).ConfigureAwait(false);
-        isLoading = false;
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await JS.InvokeVoidAsync($"getMap", latitude, longitude, Region).ConfigureAwait(false);
+            isLoading = false;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+        catch
+        {
+            NoMapText = $"Sorry, a map for {Region} could not be retreived.";
+            noMap = true;
+            isLoading = false;
+
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
     }
 }
