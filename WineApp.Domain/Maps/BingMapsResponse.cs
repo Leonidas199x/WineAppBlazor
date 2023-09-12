@@ -1,4 +1,4 @@
-﻿namespace WineApp.Domain.GoogleMaps
+﻿namespace WineApp.Domain.Maps
 {
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
     public class Address

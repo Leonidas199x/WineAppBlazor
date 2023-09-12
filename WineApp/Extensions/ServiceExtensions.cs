@@ -6,7 +6,7 @@ using WineApp.Domain;
 using WineApp.Mappers;
 using WineApp.Domain.Retailer;
 using WineApp.Domain.Region;
-using WineApp.Domain.GoogleMaps;
+using WineApp.Domain.Maps;
 
 namespace WineApp.Extensions
 {
@@ -21,7 +21,7 @@ namespace WineApp.Extensions
             services.AddTransient<IDrinkerService, DrinkerService>();
             services.AddTransient<IRetailerService, RetailerService>();
             services.AddTransient<IRegionService, RegionService>();
-            services.AddTransient<IGoogleMapsService>(x => new GoogleMapsService(apiKey, x.GetRequiredService<IHttpRequestHandler>()));
+            services.AddTransient<IMapsService>(x => new MapsService(apiKey, x.GetRequiredService<IHttpRequestHandler>()));
         }
 
         public static void RegisterUserMappers(this IServiceCollection services) 

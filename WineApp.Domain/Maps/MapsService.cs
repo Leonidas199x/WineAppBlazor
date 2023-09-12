@@ -1,13 +1,11 @@
-﻿using DataContract;
-
-namespace WineApp.Domain.GoogleMaps
+﻿namespace WineApp.Domain.Maps
 {
-    public class GoogleMapsService : IGoogleMapsService
+    public class MapsService : IMapsService
     {
         private readonly string _apiKey;
         private readonly IHttpRequestHandler _request;
 
-        public GoogleMapsService(string apiKey, IHttpRequestHandler request)
+        public MapsService(string apiKey, IHttpRequestHandler request)
         {
             _apiKey = apiKey;
             _request = request;

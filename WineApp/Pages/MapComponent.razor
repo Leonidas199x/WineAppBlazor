@@ -1,4 +1,4 @@
-﻿@inject WineApp.Domain.GoogleMaps.IGoogleMapsService GoogleMapsService;
+﻿@inject WineApp.Domain.Maps.IMapsService GoogleMapsService;
 
 @if (isLoading)
 {
@@ -19,7 +19,7 @@
         var latitude = coordinates[0];
         var longitude = coordinates[1];
 
-        await JS.InvokeVoidAsync($"getMap", latitude, longitude).ConfigureAwait(false);
+        await JS.InvokeVoidAsync($"getMap", latitude, longitude, Region).ConfigureAwait(false);
         isLoading = false;
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
