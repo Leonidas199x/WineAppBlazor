@@ -1,11 +1,14 @@
-﻿@inject WineApp.Domain.Maps.IMapsService GoogleMapsService;
+﻿@inject WineApp.Domain.Maps.IMapsService MapsService
 
 @if (isLoading)
 {
-    <p>Loading...</p>
+    <div class="center-loading">
+        <LoadingComponent />
+    </div>
 }
 <div class="spacer"></div>
 <div id="myMap"></div>
+
 
 @code {
     [Parameter]
@@ -14,7 +17,7 @@
     bool isLoading = true;
     protected override async Task OnInitializedAsync()
     {
-        var mapDetails = await GoogleMapsService.GetRegionInfo(Region).ConfigureAwait(false);
+        var mapDetails = await MapsService.GetRegionInfo(Region).ConfigureAwait(false);
         var coordinates = mapDetails.Data.resourceSets.First().resources.First().point.coordinates;
         var latitude = coordinates[0];
         var longitude = coordinates[1];
