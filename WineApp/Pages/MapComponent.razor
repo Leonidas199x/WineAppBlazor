@@ -39,7 +39,7 @@
         {
             if (!GetCoordinates && (Longitude is null || Latitude is null))
             {
-                await SetNoMap("A region or longitude and latitude are required to show a map.").ConfigureAwait(false);
+                await SetNoMap("A location or longitude and latitude are required to show a map.").ConfigureAwait(false);
                 return;
             }
 
