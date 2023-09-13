@@ -1,0 +1,465 @@
+﻿@inject WineApp.Domain.VineyardEstate.IVineyardEstateService VineyardEstateService
+@inject IVineyardEstateMapper VineyardEstateMapper
+
+@page "/VineyardEstates"
+
+<h3><HxIcon Icon="BootstrapIcon.Fan" CssClass="page-icon" />Vineyard Estates</h3>
+
+<HxButton Color="ThemeColor.Primary" OnClick="@ShowCreateModal" Icon="@BootstrapIcon.Plus" />
+<HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+
+<HxOffcanvas @ref="filter" Title="Filter">
+    <BodyTemplate>
+        <HxInputText LabelType="LabelType.Floating"
+                     ValidationMessageMode="ValidationMessageMode.None"
+        @bind-Value="@filterName"
+                     Label="Vineyard Estate" />
+        <hr />
+        <HxButton OnClick="Filter"
+                  Text="Search"
+                  Color="ThemeColor.Secondary" />
+        <HxButton OnClick="ClearFilter"
+                  Text="Clear"
+                  Color="ThemeColor.Secondary" />
+    </BodyTemplate>
+</HxOffcanvas>
+
+@if (gridError)
+{
+    <div class="spacer" />
+    <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
+}
+
+@if (!isSearch)
+{
+    <HxGrid @ref="dataGrid"
+            TItem="VineyardEstate"
+            Responsive="true"
+            DataProvider="GetGridData"
+            PageSize="10"
+            Striped="true">
+        <Columns>
+            <HxGridColumn HeaderText="Vineyard Estate"
+                          ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(VineyardEstate.Name)"
+                          IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))"
+                          Outline="true">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Danger"
+                          OnClick="@(() => ShowDeleteModal(context))"
+                          Outline="true">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+@if (isSearch)
+{
+    <HxGrid @ref="searchGrid"
+            TItem="VineyardEstate"
+            Responsive="true"
+            DataProvider="GetSearchData"
+            PageSize="10"
+            Striped="true">
+        <Columns>
+            <HxGridColumn HeaderText="Region"
+                          ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(VineyardEstate.Name)"
+                          IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton Text="Edit"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))"
+                          Outline="true">
+                </HxButton>
+                <HxButton Text="Delete"
+                          Color="ThemeColor.Danger"
+                          OnClick="@(() => ShowDeleteModal(context))"
+                          Outline="true">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+<HxModal @ref="deleteVineyardEstate"
+         Size="ModalSize.Regular"
+         Title="Delete Region">
+    <BodyTemplate>
+        @if (deleteError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <p>Are you sure you wish to delete the region '@deletevinyardName'?</p>
+        <p>This action cannot be undone.</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
+                    </td>
+                    <td>
+                        <HxButton Text="Cancel" Color="ThemeColor.Dark" OnClick="CloseDeleteModal" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </BodyTemplate>
+
+</HxModal>
+<HxModal @ref="editVineyardEstate"
+         Size="ModalSize.Large"
+         Title="@modalText">
+    <BodyTemplate>
+        @if (editError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <HxTabPanel InitialActiveTabId="region-details"
+                    NavVariant="NavVariant.Tabs"
+                    RenderMode="TabPanelRenderMode.ActiveTabOnly">
+            <HxTab Id="region-details"
+                   Title="Details">
+                <Content>
+                    <div class="spacer" />
+                    <EditForm 
+                        Model="@editableVineyardEstate"
+                        OnValidSubmit="@Save">
+                        <DataAnnotationsValidator />
+                        <HxInputText 
+                            LabelType="LabelType.Floating" 
+                            ValidationMessageMode="ValidationMessageMode.None" 
+                            @bind-Value="@editableVineyardEstate.Name" 
+                            Label="Name" />
+                        <HxInputNumber 
+                            LabelType="LabelType.Regular"
+                            ValidationMessageMode="ValidationMessageMode.None" 
+                            @bind-Value="@editableVineyardEstate.Latitude" 
+                            Label="Latitude"
+                            Decimals="14">
+                            <InputGroupStartTemplate>
+                                <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Compass" />
+                            </InputGroupStartTemplate>
+                        </HxInputNumber>
+                        <HxInputNumber 
+                            LabelType="LabelType.Regular"
+                            ValidationMessageMode="ValidationMessageMode.None" 
+                            @bind-Value="@editableVineyardEstate.Longitude" 
+                            Label="Longitude"
+                            Decimals="14">
+                            <InputGroupStartTemplate>
+                                <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Compass" />
+                            </InputGroupStartTemplate>
+                        </HxInputNumber>
+                        <div class="modal-footer">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <HxSubmit 
+                                            Text="Save" 
+                                            Color="ThemeColor.Primary" />
+                                    </td>
+                                    <td>
+                                        <HxButton 
+                                            Text="Cancel" 
+                                            Color="ThemeColor.Danger" 
+                                            OnClick="CloseEditModal" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </EditForm>
+                </Content>
+            </HxTab>
+            <HxTab Id="region-map"
+                   Title="Map">
+                <Content>
+                    <MapComponent 
+                        Location="@editableVineyardEstate.Name"
+                        GetCoordinates=false
+                        Longitude="@editableVineyardEstate.Longitude" 
+                        Latitude="@editableVineyardEstate.Latitude">
+                    </MapComponent>
+                </Content>
+            </HxTab>
+        </HxTabPanel>
+    </BodyTemplate>
+</HxModal>
+
+@code {
+    [Inject] protected IHxMessengerService Messenger { get; set; }
+
+    bool gridError = false;
+    bool editError = false;
+    bool deleteError = false;
+    bool saveError = false;
+    bool isEdit = false;
+    bool isSearch = false;
+    int TotalPages = 0;
+    int resultsPerPage = 10;
+    string errorString = string.Empty;
+    private HxModal editVineyardEstate = new HxModal();
+    private HxModal deleteVineyardEstate = new HxModal();
+    private HxOffcanvas filter;
+    VineyardEstateViewModel editableVineyardEstate;
+    EditContext editContext;
+    string filterName = string.Empty;
+    private HxGrid<VineyardEstate> dataGrid = new HxGrid<VineyardEstate>();
+    private HxGrid<VineyardEstate> searchGrid = new HxGrid<VineyardEstate>();
+    string deletevinyardName = string.Empty;
+    int deletevineyardId;
+    string modalText = string.Empty;
+
+    private async Task<GridDataProviderResult<VineyardEstate>> GetGridData(GridDataProviderRequest<VineyardEstate> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await VineyardEstateService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<VineyardEstate>();
+            }
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<VineyardEstate>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<VineyardEstate>();
+        }
+
+    }
+
+    private async Task<GridDataProviderResult<VineyardEstate>> GetSearchData(GridDataProviderRequest<VineyardEstate> request)
+    {
+        try
+        {
+            isSearch = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await VineyardEstateService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<VineyardEstate>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<VineyardEstate>();
+        }
+
+    }
+
+    private async void ShowEditModal(VineyardEstate value)
+    {
+        try
+        {
+            modalText = "Edit Vineyard Estate";
+            await SetEdit(true).ConfigureAwait(false);
+            await ClearEditError().ConfigureAwait(false);
+
+            var result = await VineyardEstateService.Get(value.Id).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                editError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            editableVineyardEstate = VineyardEstateMapper.Map(result.Data);
+
+            await InvokeAsync(editVineyardEstate.ShowAsync).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async void ShowDeleteModal(VineyardEstate value)
+    {
+        deletevineyardId = value.Id;
+        deletevinyardName = value.Name;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(deleteVineyardEstate.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            var result = (isEdit)
+                        ? await SaveEdit().ConfigureAwait(false)
+                        : await SaveNew().ConfigureAwait(false);
+
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await ShowEditError().ConfigureAwait(false);
+                return;
+            }
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
+
+            Messenger.AddInformation(title: "Success", message: $"Vineyard Estate '{editableVineyardEstate.Name}' saved successfully.");
+
+            await CloseEditModal();
+        }
+        catch (Exception)
+        {
+            await ShowEditError().ConfigureAwait(false);
+        }
+    }
+
+    private async Task<Result> SaveEdit()
+    {
+        var colour = VineyardEstateMapper.Map(editableVineyardEstate);
+
+        return await VineyardEstateService.Put(colour).ConfigureAwait(false);
+    }
+
+    private async Task<Result> SaveNew()
+    {
+        var region = VineyardEstateMapper.MapNew(editableVineyardEstate);
+
+        return await VineyardEstateService.Post(region).ConfigureAwait(false);
+    }
+
+    private async Task ShowCreateModal()
+    {
+        modalText = "Add Vineyard Estate";
+        await SetEdit(false).ConfigureAwait(false);
+        await ClearEditError().ConfigureAwait(false);
+        editableVineyardEstate = new VineyardEstateViewModel();
+
+        await InvokeAsync(editVineyardEstate.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task ShowEditError()
+    {
+        editError = true;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearEditError()
+    {
+        editError = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CloseEditModal()
+    {
+        await editVineyardEstate.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task CloseDeleteModal()
+    {
+        await deleteVineyardEstate.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task SetEdit(bool value)
+    {
+        isEdit = value;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task FilterOpen()
+    {
+        await filter.ShowAsync();
+    }
+
+    private async Task Filter()
+    {
+        isSearch = true;
+        await searchGrid.RefreshDataAsync().ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearFilter()
+    {
+        isSearch = false;
+        filterName = string.Empty;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            var result = await VineyardEstateService.Delete(deletevineyardId).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = $"There was an error deleting the record. The error is: {result.Error}";
+                deleteError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            Messenger.AddInformation(title: "Success", message: $"Vineyard Estate '{deletevinyardName}' deleted successfully.");
+
+            deletevineyardId = default;
+            deletevinyardName = string.Empty;
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
+
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await CloseDeleteModal().ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            errorString = $"There was an error deleting the vineyard estate";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async Task RefreshGrid(bool isSearch)
+    {
+        if (isSearch)
+        {
+            await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+
+            return;
+        }
+
+        await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+    }
+}
