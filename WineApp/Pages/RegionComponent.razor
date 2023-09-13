@@ -178,7 +178,10 @@
                 Id="region-map"
                 Title="Map">
                 <Content>
-                    <MapComponent Region="@editableRegion.Name"></MapComponent>
+                    <MapComponent 
+                        Location="@editableRegion.Name"
+                        GetCoordinates=true>
+                    </MapComponent>
                 </Content>
             </HxTab>
         </HxTabPanel>
