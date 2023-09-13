@@ -18,7 +18,16 @@
 
 @code {
     [Parameter]
-    public string Region { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool GetCoordinates { get; set; }
+
+    [Parameter]
+    public decimal? Longitude { get; set; }
+
+    [Parameter]
+    public decimal? Latitude { get; set; }
 
     bool isLoading = true;
     bool noMap = false;
@@ -28,22 +37,54 @@
     {
         try
         {
-            var mapDetails = await MapsService.GetRegionInfo(Region).ConfigureAwait(false);
-            var coordinates = mapDetails.Data.resourceSets.First().resources.First().point.coordinates;
-            var latitude = coordinates[0];
-            var longitude = coordinates[1];
+            if (!GetCoordinates && (Longitude is null || Latitude is null))
+            {
+                await SetNoMap("A region or longitude and latitude are required to show a map.").ConfigureAwait(false);
+                return;
+            }
 
-            await JS.InvokeVoidAsync($"getMap", latitude, longitude, Region).ConfigureAwait(false);
+            double latitude;
+            double longitude;
+
+            (latitude, longitude) = GetCoordinates 
+                                        ? await GetMapDetails().ConfigureAwait(false) 
+                                        : ConvertCoordinates(Latitude.Value, Longitude.Value);
+
+            //Add a pause to ensure the tab has changed, and the js can update the map div.
+            await Task.Delay(new TimeSpan(0, 0, 1));
+
+            await JS.InvokeVoidAsync($"getMap", latitude, longitude, Location).ConfigureAwait(false);
             isLoading = false;
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
         catch
         {
-            NoMapText = $"Sorry, a map for {Region} could not be retreived.";
-            noMap = true;
-            isLoading = false;
-
+            await SetNoMap($"Sorry, a map for {Location} could not be retreived.").ConfigureAwait(false);
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
+    }
+
+    private (double, double) ConvertCoordinates(decimal latitude, decimal longitude)
+    {
+        return (Decimal.ToDouble(latitude), Decimal.ToDouble(longitude));
+    }
+
+    private async Task<(double, double)> GetMapDetails()
+    {
+        var mapDetails = await MapsService.GetRegionInfo(Location).ConfigureAwait(false);
+        var coordinates = mapDetails.Data.resourceSets.First().resources.First().point.coordinates;
+        var latitude = coordinates[0];
+        var longitude = coordinates[1];
+
+        return (latitude, longitude);
+    }
+
+    private async Task SetNoMap(string text)
+    {
+        NoMapText = text;
+        noMap = true;
+        isLoading = false;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 }
