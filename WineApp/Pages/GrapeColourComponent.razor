@@ -185,6 +185,13 @@
             }
 
             var result = await GrapeColourService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<GrapeColour>();
+            }
 
             TotalPages = result.Data.TotalPages;
 
@@ -217,6 +224,13 @@
             }
 
             var result = await GrapeColourService.Search(filterColour, page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<GrapeColour>();
+            }
 
             TotalPages = result.Data.TotalPages;
 

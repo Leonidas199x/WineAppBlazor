@@ -266,6 +266,13 @@
             }
 
             var result = await VineyardEstateService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<VineyardEstate>();
+            }
 
             TotalPages = result.Data.TotalPages;
 

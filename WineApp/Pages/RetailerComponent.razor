@@ -278,6 +278,13 @@
             }
 
             var result = await RetailerService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<Retailer>();
+            }
 
             TotalPages = result.Data.TotalPages;
 
@@ -310,6 +317,13 @@
             }
 
             var result = await RetailerService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<Retailer>();
+            }
 
             TotalPages = result.Data.TotalPages;
 

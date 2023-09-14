@@ -225,6 +225,13 @@
             }
 
             var result = await CountryService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<Country>();
+            }
 
             TotalPages = result.Data.TotalPages;
 
@@ -257,6 +264,13 @@
             }
 
             var result = await CountryService.Search(filterName, filterIsoCode, page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<Country>();
+            }
 
             TotalPages = result.Data.TotalPages;
 
