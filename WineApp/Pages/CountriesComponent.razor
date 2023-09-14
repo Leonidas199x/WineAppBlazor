@@ -318,17 +318,11 @@
     {
         try
         {
-            Result result;
-            if (isEdit)
-            {
-                result = await SaveEdit().ConfigureAwait(false);
-            }
-            else
-            {
-                result = await SaveNew().ConfigureAwait(false);
-            }
-
-            if(!result.IsSuccess)
+            var result = isEdit 
+                            ? await SaveEdit().ConfigureAwait(false) 
+                            : await SaveNew().ConfigureAwait(false);
+           
+            if (!result.IsSuccess)
             {
                 errorString = result.Error;
                 await InvokeAsync(StateHasChanged).ConfigureAwait(false);
