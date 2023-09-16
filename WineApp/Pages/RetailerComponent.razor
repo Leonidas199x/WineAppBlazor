@@ -257,8 +257,8 @@
     string errorString = string.Empty;
     private HxModal editRetailer = new HxModal();
     private HxModal deleteRetailer = new HxModal();
-    private HxOffcanvas filter;
-    RetailerViewModel editableRetailer;
+    private HxOffcanvas filter = new HxOffcanvas();
+    RetailerViewModel editableRetailer = new RetailerViewModel();
     EditContext editContext;
     string filterName = string.Empty;
     private HxGrid<Retailer> dataGrid = new HxGrid<Retailer>();
