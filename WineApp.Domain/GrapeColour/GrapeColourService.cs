@@ -5,7 +5,7 @@ namespace WineApp.Domain.GrapeColour
 {
     public class GrapeColourService : IGrapeColourService
     {
-        private readonly string _endpoint = "GrapeColour";
+        private readonly string _endpoint = "Grape/Colour";
         private readonly IHttpRequestHandler _request;
 
         public GrapeColourService(IHttpRequestHandler request)
