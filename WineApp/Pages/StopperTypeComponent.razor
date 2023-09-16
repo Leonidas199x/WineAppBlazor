@@ -152,7 +152,8 @@
 </HxModal>
 
 @code {
-    [Inject] protected IHxMessengerService Messenger { get; set; }
+    [Inject] 
+    protected IHxMessengerService Messenger { get; set; }
 
     bool gridError = false;
     bool editError = false;
@@ -165,8 +166,8 @@
     string errorString = string.Empty;
     private HxModal editStopperType = new HxModal();
     private HxModal deleteStopperType = new HxModal();
-    private HxOffcanvas filter;
-    StopperTypeViewModel editableStopperType;
+    private HxOffcanvas filter = new HxOffcanvas();
+    StopperTypeViewModel editableStopperType = new StopperTypeViewModel();
     EditContext editContext;
     string filterColour = string.Empty;
     private HxGrid<StopperType> dataGrid = new HxGrid<StopperType>();
