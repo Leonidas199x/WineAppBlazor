@@ -9,6 +9,7 @@ using WineApp.Domain.Region;
 using WineApp.Domain.Maps;
 using WineApp.Domain.VineyardEstate;
 using WineApp.Domain.WineType;
+using WineApp.Domain.Wine;
 
 namespace WineApp.Extensions
 {
@@ -26,6 +27,7 @@ namespace WineApp.Extensions
             services.AddTransient<IMapsService>(x => new MapsService(apiKey, x.GetRequiredService<IHttpRequestHandler>()));
             services.AddTransient<IVineyardEstateService, VineyardEstateService>();
             services.AddTransient<IWineTypeService, WineTypeService>();
+            services.AddTransient<IWineService, WineService>();
         }
 
         public static void RegisterUserMappers(this IServiceCollection services) 
