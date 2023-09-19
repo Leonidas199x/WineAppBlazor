@@ -10,6 +10,7 @@ using WineApp.Domain.Maps;
 using WineApp.Domain.VineyardEstate;
 using WineApp.Domain.WineType;
 using WineApp.Domain.Wine;
+using WineApp.Domain.QualityControl;
 
 namespace WineApp.Extensions
 {
@@ -28,6 +29,7 @@ namespace WineApp.Extensions
             services.AddTransient<IVineyardEstateService, VineyardEstateService>();
             services.AddTransient<IWineTypeService, WineTypeService>();
             services.AddTransient<IWineService, WineService>();
+            services.AddTransient<IQualityControlService, QualityControlService>();
         }
 
         public static void RegisterUserMappers(this IServiceCollection services) 
@@ -40,6 +42,7 @@ namespace WineApp.Extensions
             services.AddSingleton<IRegionMapper, RegionMapper>();
             services.AddSingleton<IVineyardEstateMapper, VineyardEstateMapper>();
             services.AddSingleton<IWineTypeMapper, WineTypeMapper>();
+            services.AddSingleton<IQualityControlMapper, QualityControlMapper>();
         }
     }
 }
