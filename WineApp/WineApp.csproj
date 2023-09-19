@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Havit.Blazor.Components.Web.Bootstrap" Version="4.1.1" />
     <PackageReference Include="Microsoft.Fast.Components.FluentUI" Version="3.0.0-RC.1" />
-    <PackageReference Include="WineApi.DataContract" Version="1.0.3" />
+    <PackageReference Include="WineApi.DataContract" Version="1.0.5" />
   </ItemGroup>
 
   <ItemGroup>
