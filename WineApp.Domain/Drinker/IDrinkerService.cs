@@ -10,6 +10,8 @@ namespace WineApp.Domain.Drinker
 
         public Task<Result<DataContract.Drinker>> Get(int id);
 
+        Task<Result<IEnumerable<DataContract.Drinker>>> GetLookup();
+
         Task<Result> Put(DataContract.Drinker drinker);
 
         Task<Result> Post(DrinkerCreate country);
