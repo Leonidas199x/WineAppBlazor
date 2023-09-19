@@ -118,7 +118,7 @@
                         <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
                     </td>
                     <td>
-                        <HxButton Text="Cancel" Color="ThemeColor.Dark" OnClick="CloseDeleteModal" />
+                        <HxButton Text="Cancel" Color="ThemeColor.Secondary" OnClick="CloseDeleteModal" />
                     </td>
                 </tr>
             </table>
@@ -212,7 +212,7 @@
     string deleteRegionName = string.Empty;
     int deleteRegionId;
     string modalText = string.Empty;
-    IEnumerable<CountryLookup> countries = null;
+    IEnumerable<CountryLookup> countries = new List<CountryLookup>();
 
     private async Task<GridDataProviderResult<Region>> GetGridData(GridDataProviderRequest<Region> request)
     {
