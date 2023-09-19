@@ -60,12 +60,12 @@
                 SortString="@nameof(Country.IsoCode)" />
             <HxContextMenuGridColumn>
                 <HxButton 
-                    Text="Edit"
+                    Icon="BootstrapIcon.Pencil"
                     Color="ThemeColor.Primary"
                     OnClick="@(() => ShowEditModal(context))">
                 </HxButton>
                 <HxButton 
-                    Text="Delete"
+                    Icon="BootstrapIcon.Trash"
                     Color="ThemeColor.Secondary"
                     OnClick="@(() => ShowDeleteModal(context))">
                 </HxButton>
@@ -94,15 +94,14 @@
                 ItemTextSelector="@(item => item.IsoCode)" 
                 SortString="@nameof(Country.IsoCode)" />
             <HxContextMenuGridColumn>
-                <HxButton 
-                    Text="Edit" 
+                <HxButton Icon="BootstrapIcon.Pencil"
                     Color="ThemeColor.Primary" 
                     OnClick="@(() => ShowEditModal(context))">
                 </HxButton>
                 <HxButton 
-                    Text="Delete"
-                     Color="ThemeColor.Dark"
-                     OnClick="@(() => ShowDeleteModal(context))">
+                    Icon="BootstrapIcon.Trash"
+                    Color="ThemeColor.Dark"
+                    OnClick="@(() => ShowDeleteModal(context))">
                 </HxButton>
             </HxContextMenuGridColumn>
         </Columns>
