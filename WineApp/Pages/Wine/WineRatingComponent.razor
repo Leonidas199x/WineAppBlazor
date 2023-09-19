@@ -1,0 +1,201 @@
+﻿<HxButton Color="ThemeColor.Primary" OnClick="Create" Icon="@BootstrapIcon.Plus" />
+<div class="spacer" />
+@if (hasRatings)
+{
+    @if(!string.IsNullOrEmpty(errorMessage))
+    {
+        <HxAlert Color="ThemeColor.Danger">@errorMessage</HxAlert>
+    }
+
+    @if (!isEdit && !isCreate && !isDelete)
+    {
+        <HxGrid 
+            @ref="ratingsGrid"
+            TItem="WineRating"
+            Responsive="true"
+            DataProvider="GetRatings"
+            PageSize="10"
+            Striped="true">
+            <Columns>
+                <HxGridColumn 
+                    HeaderText="Drinker"
+                    ItemTextSelector="@(item => item.Drinker.Name)"
+                    SortString="@nameof(WineRating.Drinker.Name)"
+                    IsDefaultSortColumn="true" />
+                <HxGridColumn 
+                    HeaderText="Rating"
+                    ItemTextSelector="@(item => item.Rating.ToString())"
+                    SortString="@nameof(WineRating.Rating)" />
+                <HxContextMenuGridColumn>
+                    <HxButton 
+                        Icon="BootstrapIcon.Pencil"
+                        Color="ThemeColor.Primary"
+                        OnClick="@(() => Edit(context))">
+                    </HxButton>
+                    <HxButton 
+                        Icon="BootstrapIcon.Trash"
+                        Color="ThemeColor.Secondary"
+                        OnClick="@(() => Delete(context))">
+                    </HxButton>
+                </HxContextMenuGridColumn>
+            </Columns>
+        </HxGrid>
+    }
+    else if (isEdit)
+    {
+        <RatingComponent RatingViewModel="@ratingViewModel" OnCancel="CancelEdit" OnSave="Save"/>
+    }
+    else if (isCreate)
+    {
+        <RatingComponent RatingViewModel="@ratingViewModel" OnCancel="CancelCreate" OnSave="Save"/>
+    }
+    else if (isDelete)
+    {
+        <p>Are you sure you wish to delete the rating of @drinkerRating by @drinker?</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="DeleteRating" />
+                    </td>
+                    <td>
+                        <HxButton Text="Cancel" Color="ThemeColor.Secondary" OnClick="CancelDelete" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    }
+}
+else
+{
+    <p>No ratings. Press the + button above to add a rating for this wine.</p>
+}
+
+
+@code {
+    [Parameter]
+    public Wine Wine { get; set; }
+
+    private HxGrid<WineRating> ratingsGrid = new HxGrid<WineRating>();
+    private HxModal addEditRating = new HxModal();
+    int resultsPerPage = 10;
+    int TotalPages = 0;
+    bool ratingGridError = false;
+    bool hasRatings = false;
+    string modalTitle = string.Empty;
+    string errorMessage = string.Empty;
+    bool isEdit = false;
+    bool isCreate = false;
+    bool isDelete = false;
+    int drinkerRating;
+    string drinker = string.Empty;
+    RatingViewModel ratingViewModel = new RatingViewModel();
+
+    protected override void OnInitialized()
+    {
+        hasRatings = Wine.Ratings.Any();
+    }
+
+    private async Task<GridDataProviderResult<WineRating>> GetRatings(GridDataProviderRequest<WineRating> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            TotalPages = Wine.Ratings.Count() / resultsPerPage;
+
+            return new GridDataProviderResult<WineRating>
+                {
+                    Data = Wine.Ratings,
+                    TotalCount = Wine.Ratings.Count(),
+                };
+        }
+        catch (Exception)
+        {
+            ratingGridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<WineRating>();
+        }
+    }
+
+    private async Task Edit(WineRating rating)
+    {
+        isEdit = true;
+        isCreate = false;
+        isDelete = false;
+
+        ratingViewModel = new RatingViewModel
+            {
+                Id = rating.Id,
+                DrinkerId = rating.Drinker.Id,
+                Rating = rating.Rating,
+            };
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Create()
+    {
+        isEdit = false;
+        isCreate = true;
+        isDelete = false;
+
+        ratingViewModel = new RatingViewModel();
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Delete(WineRating rating)
+    {
+        isEdit = false;
+        isCreate = false;
+        isDelete = true;
+
+        drinkerRating = rating.Rating;
+        drinker = rating.Drinker.Name;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task DeleteRating()
+    {
+
+    }
+
+    private async Task CancelEdit()
+    {
+        isEdit = false;
+        isCreate = false;
+        isDelete = false;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CancelCreate()
+    {
+        isEdit = false;
+        isCreate = false;
+        isDelete = false;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CancelDelete()
+    {
+        isEdit = false;
+        isCreate = false;
+        isDelete = false;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Save(RatingViewModel rating)
+    {
+        
+    }
+}
