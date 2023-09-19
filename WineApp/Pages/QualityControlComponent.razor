@@ -88,7 +88,7 @@
     </HxGrid>
 }
 
-<HxModal @ref="deleteWineType"
+<HxModal @ref="deleteQc"
          Size="ModalSize.Regular"
          Title="Delete Quality Controller">
     <BodyTemplate>
@@ -113,7 +113,7 @@
     </BodyTemplate>
 
 </HxModal>
-<HxModal @ref="editWineType"
+<HxModal @ref="editQc"
          Size="ModalSize.Large"
          Title="@modalText">
     <BodyTemplate>
@@ -156,8 +156,8 @@
     int TotalPages = 0;
     int resultsPerPage = 10;
     string errorString = string.Empty;
-    private HxModal editWineType = new HxModal();
-    private HxModal deleteWineType = new HxModal();
+    private HxModal editQc = new HxModal();
+    private HxModal deleteQc = new HxModal();
     private HxOffcanvas filter;
     QualityControlViewModel editableModel;
     EditContext editContext;
@@ -263,7 +263,7 @@
 
             editableModel = QualityControlMapper.Map(result.Data);
 
-            await InvokeAsync(editWineType.ShowAsync).ConfigureAwait(false);
+            await InvokeAsync(editQc.ShowAsync).ConfigureAwait(false);
         }
         catch (Exception)
         {
@@ -278,7 +278,7 @@
         deleteName = value.Name;
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-        await InvokeAsync(deleteWineType.ShowAsync).ConfigureAwait(false);
+        await InvokeAsync(deleteQc.ShowAsync).ConfigureAwait(false);
     }
 
     private async Task Save()
@@ -330,7 +330,7 @@
         await ClearEditError().ConfigureAwait(false);
         editableModel = new QualityControlViewModel();
 
-        await InvokeAsync(editWineType.ShowAsync).ConfigureAwait(false);
+        await InvokeAsync(editQc.ShowAsync).ConfigureAwait(false);
     }
 
     private async Task ShowEditError()
@@ -347,12 +347,12 @@
 
     private async Task CloseEditModal()
     {
-        await editWineType.HideAsync().ConfigureAwait(false);
+        await editQc.HideAsync().ConfigureAwait(false);
     }
 
     private async Task CloseDeleteModal()
     {
-        await deleteWineType.HideAsync().ConfigureAwait(false);
+        await deleteQc.HideAsync().ConfigureAwait(false);
     }
 
     private async Task SetEdit(bool value)
