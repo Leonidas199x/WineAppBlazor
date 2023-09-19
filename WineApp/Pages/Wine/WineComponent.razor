@@ -41,6 +41,14 @@ else
                                     <span class="far fa-star"></span>
                                 }
                             </td>
+                            <td>
+                                <img class="flag-wine-view" src="@flagLocation" alt="Sorry, a flag for @Wine.Region.Country.IsoCode is not currently available." />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="spacer" />
+                            </td>
                         </tr>
                         <tr>
                             <td>
@@ -87,22 +95,13 @@ else
                 Title="Vineyard Estate">
                 <Content>
                     <div class="spacer" />
-                    <HxSelect 
-                        TItem="RegionLookup"
-                        TValue="int"
-                        Label="Region"
-                        Data="@regions"
-                        @bind-Value="@Wine.Region.Id"
-                        TextSelector="@(p => p.Name)"
-                        ValueSelector="@(p => p.Id)"
-                        Nullable="true"
-                        NullDataText="Loading Regions..."
-                        Enabled="@isEdit" />
-                        <MapComponent 
-                            Latitude="@Wine.VineyardEstate.Latitude" 
-                            Longitude="@Wine.VineyardEstate.Longitude" 
-                            Location="@Wine.VineyardEstate.Name"
-                            GetCoordinates=false />
+                    <p>@Wine.Description is from the @Wine.Region.Name region of @Wine.Region.Country.Name</p>
+                    <p>Below is a map, which shows the location of the vineyard '@Wine.VineyardEstate.Name' where @Wine.Description is produced by @Wine.Producer.Name.</p>
+                    <MapComponent 
+                        Latitude="@Wine.VineyardEstate.Latitude" 
+                        Longitude="@Wine.VineyardEstate.Longitude" 
+                        Location="@Wine.VineyardEstate.Name"
+                        GetCoordinates=false />
                 </Content>
             </HxTab>
             <HxTab 
@@ -175,7 +174,7 @@ else
 
             var flagString = $"{NavigationManager.BaseUri}/images/flags/{Wine.Region.Country.IsoCode.ToLower()}.svg";
             flagLocation = new Uri(flagString);
-            flagExists = Directory.Exists("");
+
             isLoading = false;
 
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
