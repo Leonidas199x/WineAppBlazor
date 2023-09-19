@@ -1,0 +1,202 @@
+﻿@inject WineApp.Domain.Wine.IWineService WineService
+@inject WineApp.Domain.Region.IRegionService RegionService
+
+@if(isLoading)
+{
+    <div class="center-loading">
+        <LoadingComponent />
+    </div>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(errorString))
+    {
+        <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+    }
+    else
+    {
+        <HxTabPanel 
+            InitialActiveTabId="overview"
+            RenderMode="TabPanelRenderMode.ActiveTabOnly">
+            <HxTab 
+                Id="overview"
+                Title="Overview">
+                <Content>
+                    <div class="spacer" />
+                    <table>
+                        <tr>
+                            <td>
+                                @for(int i = 0; i <= (averageRating-1); i++)
+                                {
+                                    <span class="fas fa-star"></span>
+                                }
+
+                                @if (showHalfStar)
+                                {
+                                    <span class="fas fa-star-half"></span>
+                                }
+
+                                @for(int i = 0; i <= emptyStars; i++)
+                                {
+                                    <span class="far fa-star"></span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <HxInputText LabelType="LabelType.Regular" Label="Name" @bind-Value="@Wine.Description" Enabled="@isEdit"></HxInputText>
+                            </td>
+                            <td>
+                                <HxInputNumber LabelType="LabelType.Regular" Label="ABV" @bind-Value="@Wine.Abv" Enabled="@isEdit" >
+                                    <InputGroupStartTemplate>
+                                        <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Percent" />
+                                    </InputGroupStartTemplate>
+                                </HxInputNumber>
+                            </td>
+                            <td>
+                                <HxSelect 
+                                    TItem="RegionLookup"
+                                    TValue="int"
+                                    Label="Region"
+                                    Data="@regions"
+                                    @bind-Value="@Wine.Region.Id"
+                                    TextSelector="@(p => p.Name)"
+                                    ValueSelector="@(p => p.Id)"
+                                    Nullable="true"
+                                    NullDataText="Loading Regions..."
+                                    Enabled="@isEdit"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <HxInputText LabelType="LabelType.Regular" Label="Importer" @bind-Value="@Wine.Importer" Enabled="@isEdit"></HxInputText>
+                            </td>
+                            <td>
+                                <HxInputNumber LabelType="LabelType.Regular" Label="Inventory Level" @bind-Value="@Wine.InventoryLevel" Enabled="@isEdit">
+                                    <InputGroupStartTemplate>
+                                        <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Plus" />
+                                    </InputGroupStartTemplate>
+                                </HxInputNumber>
+                            </td>
+                        </tr>
+                    </table>
+                </Content>
+            </HxTab>
+            <HxTab 
+                Id="vineyard"
+                Title="Vineyard Estate">
+                <Content>
+                    <div class="spacer" />
+                    <HxSelect 
+                        TItem="RegionLookup"
+                        TValue="int"
+                        Label="Region"
+                        Data="@regions"
+                        @bind-Value="@Wine.Region.Id"
+                        TextSelector="@(p => p.Name)"
+                        ValueSelector="@(p => p.Id)"
+                        Nullable="true"
+                        NullDataText="Loading Regions..."
+                        Enabled="@isEdit" />
+                        <MapComponent 
+                            Latitude="@Wine.VineyardEstate.Latitude" 
+                            Longitude="@Wine.VineyardEstate.Longitude" 
+                            Location="@Wine.VineyardEstate.Name"
+                            GetCoordinates=false />
+                </Content>
+            </HxTab>
+            <HxTab 
+                Id="ratings"
+                Title="Ratings">
+                <Content>
+                    <div class="spacer" />
+                    <WineRatingComponent Wine="@Wine"/>
+                </Content>
+            </HxTab>
+            <HxTab 
+                Id="prices"
+                Title="Prices">
+            </HxTab>
+            <HxTab 
+                Id="issues"
+                Title="Issues">
+            </HxTab>
+            <HxTab 
+                Id="orders"
+                Title="Orders">
+            </HxTab>
+        </HxTabPanel>
+    }
+}
+
+@code {
+    [Parameter]
+    public int WineId { get; set; }
+
+    bool isLoading = true;
+    string errorString = string.Empty;
+    DataContract.Wine Wine = new Wine();
+    Uri? flagLocation;
+    bool flagExists = false;
+    decimal averageRating;
+    bool isEdit = false;
+    IEnumerable<RegionLookup>? regions;
+    bool showHalfStar = false;
+    int emptyStars = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await WineService.Get(WineId).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            Wine = result.Data;
+            averageRating = GetAverageRating();
+
+            showHalfStar = !decimal.IsInteger(averageRating);
+            var wholeStars = Convert.ToInt32(averageRating);
+            emptyStars = showHalfStar ? (9 - wholeStars) : (10 - wholeStars);
+
+            var regionResult = await RegionService.GetLookup().ConfigureAwait(false);
+            if (!regionResult.IsSuccess)
+            {
+                errorString = result.Error;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            regions = regionResult.Data;
+
+            var flagString = $"{NavigationManager.BaseUri}/images/flags/{Wine.Region.Country.IsoCode.ToLower()}.svg";
+            flagLocation = new Uri(flagString);
+            flagExists = Directory.Exists("");
+            isLoading = false;
+
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+        catch
+        {
+            errorString = UserTextResponses.ErrorMessage;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+    }
+
+    private decimal GetAverageRating()
+    {
+        if (Wine.Ratings.Any())
+        {
+            decimal ratingTotal = Wine.Ratings.Sum(x => x.Rating);
+            decimal count = Wine.Ratings.Count();
+            return ratingTotal / count;
+        }
+
+        return 0;
+    }
+}
