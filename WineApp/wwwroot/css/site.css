@@ -85,6 +85,15 @@ a, .btn-link {
     width: 5%;
 }
 
+.flag-wine-view {
+    width: 4rem !important;
+    height: 1.5rem;
+    display: block;
+    right: 260px;
+    position: absolute;
+    padding-right: 30px;
+}
+
 .admin-filter {
     position: absolute;
     right: 20px;
