@@ -1,0 +1,346 @@
+﻿@inject WineApp.Domain.Wine.IWineService WineService
+
+@page "/Wines"
+
+<h3><HxIcon Icon="BootstrapIcon.CupStraw" CssClass="page-icon" />Wines</h3>
+
+<HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
+<HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+
+<HxOffcanvas @ref="filter" Title="Filter">
+    <BodyTemplate>
+        <HxInputText 
+            LabelType="LabelType.Floating"
+            ValidationMessageMode="ValidationMessageMode.None"
+            @bind-Value="@filterName"
+            Label="Name" />
+        <hr />
+        <HxButton 
+            OnClick="Filter"
+            Text="Search"
+            Color="ThemeColor.Secondary"/>
+        <HxButton 
+            OnClick="ClearFilter"
+            Text="Clear"
+            Color="ThemeColor.Secondary"/>
+    </BodyTemplate>
+</HxOffcanvas>
+
+@if (gridError)
+{
+    <div class="spacer" />
+    <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
+}
+
+@if (!isSearch)
+{
+    <HxGrid 
+        @ref="dataGrid"
+        TItem="WineHeader"
+        Responsive="true"
+        DataProvider="GetGridData"
+        PageSize="10"
+        Striped="true">
+        <Columns>
+            <HxGridColumn 
+                HeaderText="Description"
+                ItemTextSelector="@(item => item.Description)"
+                SortString="@nameof(WineHeader.Description)"
+                IsDefaultSortColumn="true" />
+            <HxGridColumn 
+                HeaderText="Type"
+                ItemTextSelector="@(item => item.WineType)"
+                SortString="@nameof(WineHeader.WineType)"
+                IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton 
+                    Icon="BootstrapIcon.Eye"
+                    Color="ThemeColor.Primary"
+                    OnClick="@(() => ShowViewModal(context))">
+                </HxButton>
+                <HxButton 
+                    Icon="BootstrapIcon.Trash"
+                    Color="ThemeColor.Secondary"
+                    OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+@if (isSearch)
+{
+    <HxGrid 
+        @ref="searchGrid"
+        TItem="WineHeader"
+        Responsive="true"
+        DataProvider="GetSearchData"
+        PageSize="10"
+        Striped="true">
+        <Columns>
+            <HxGridColumn 
+                HeaderText="Description"
+                ItemTextSelector="@(item => item.Description)"
+                SortString="@nameof(WineHeader.Description)"
+                IsDefaultSortColumn="true" />
+            <HxContextMenuGridColumn>
+                <HxButton 
+                    Icon="BootstrapIcon.Eye"
+                    Color="ThemeColor.Primary"
+                    OnClick="@(() => ShowViewModal(context))">
+                </HxButton>
+                <HxButton 
+                    Icon="BootstrapIcon.Trash"
+                    Color="ThemeColor.Secondary"
+                    OnClick="@(() => ShowDeleteModal(context))">
+                </HxButton>
+            </HxContextMenuGridColumn>
+        </Columns>
+    </HxGrid>
+}
+
+<HxModal 
+    @ref="deleteWine"
+    Size="ModalSize.Regular"
+    Title="Delete Wine">
+    <BodyTemplate>
+        @if (deleteError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <p>Are you sure you wish to delete the @entity '@deleteName'?</p>
+        <p>This action cannot be undone.</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton 
+                            Text="Delete" 
+                            Color="ThemeColor.Danger" 
+                            OnClick="Delete" />
+                    </td>
+                    <td>
+                        <HxButton 
+                            Text="Cancel"
+                            Color="ThemeColor.Secondary"
+                            OnClick="CloseDeleteModal" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </BodyTemplate>
+
+</HxModal>
+<HxModal 
+    @ref="showWine"
+    Size="ModalSize.Large"
+    Title="@wineName">
+    <BodyTemplate>
+       <WineComponent WineId="@wineId"/>
+    </BodyTemplate>
+</HxModal>
+
+@code {
+    [Inject] protected IHxMessengerService Messenger { get; set; }
+
+    bool gridError = false;
+    bool editError = false;
+    bool deleteError = false;
+    bool saveError = false;
+    bool isEdit = false;
+    bool isSearch = false;
+    int TotalPages = 0;
+    int resultsPerPage = 10;
+    string errorString = string.Empty;
+    private HxModal showWine = new HxModal();
+    private HxModal deleteWine = new HxModal();
+    private HxOffcanvas filter;
+    EditContext editContext;
+    string filterName = string.Empty;
+    private HxGrid<WineHeader> dataGrid = new HxGrid<WineHeader>();
+    private HxGrid<WineHeader> searchGrid = new HxGrid<WineHeader>();
+    string deleteName = string.Empty;
+    int deleteId;
+    string entity = "Wine";
+    int wineId;
+    string wineName = string.Empty;
+
+    private async Task<GridDataProviderResult<WineHeader>> GetGridData(GridDataProviderRequest<WineHeader> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await WineService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<WineHeader>();
+            }
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<WineHeader>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<WineHeader>();
+        }
+    }
+
+    private async Task<GridDataProviderResult<WineHeader>> GetSearchData(GridDataProviderRequest<WineHeader> request)
+    {
+        try
+        {
+            isSearch = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await WineService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return new GridDataProviderResult<WineHeader>();
+            }
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<WineHeader>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<WineHeader>();
+        }
+
+    }
+
+    private async void ShowViewModal(WineHeader value)
+    {
+        try
+        {
+            wineName = value.Description;
+            wineId = value.Id;
+            await InvokeAsync(showWine.ShowAsync).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            editError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async void ShowDeleteModal(WineHeader value)
+    {
+        deleteId = value.Id;
+        deleteName = value.Description;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(deleteWine.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task CloseDeleteModal()
+    {
+        deleteError = false;
+        errorString = string.Empty;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await deleteWine.HideAsync().ConfigureAwait(false);
+    }
+
+    private async Task FilterOpen()
+    {
+        await filter.ShowAsync();
+    }
+
+    private async Task Filter()
+    {
+        isSearch = true;
+        await searchGrid.RefreshDataAsync().ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task ClearFilter()
+    {
+        isSearch = false;
+        filterName = string.Empty;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            var result = await WineService.Delete(deleteId).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                errorString = $"There was an error deleting the record. The error is: {result.Error}";
+                deleteError = true;
+                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                return;
+            }
+
+            Messenger.AddInformation(title: "Success", message: $"{entity} '{deleteName}' deleted successfully.");
+
+            deleteId = default;
+            deleteName = string.Empty;
+
+            await RefreshGrid(isSearch).ConfigureAwait(false);
+
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await CloseDeleteModal().ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            errorString = $"There was an error deleting the {entity}";
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+    }
+
+    private async Task RefreshGrid(bool isSearch)
+    {
+        if (isSearch)
+        {
+            await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+
+            return;
+        }
+
+        await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+    }
+
+    private async Task ShowCreateModal()
+    {
+        // modalText = "Add New Country";
+        // await SetEdit(false).ConfigureAwait(false);
+        // await ClearEditError().ConfigureAwait(false);
+        // editableCountry = new CountryViewModel();
+
+        await InvokeAsync(showWine.ShowAsync).ConfigureAwait(false);
+    }
+}
