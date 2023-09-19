@@ -10,6 +10,8 @@ namespace WineApp.Domain.Region
 
         Task<Result<DataContract.Region>> Get(int id);
 
+        Task<Result<IEnumerable<RegionLookup>>> GetLookup();
+
         Task<Result> Put(DataContract.Region region);
 
         Task<Result> Post(RegionCreate region);

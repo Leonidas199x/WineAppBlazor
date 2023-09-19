@@ -66,5 +66,29 @@ namespace WineApp.Domain.Region
                         .DeleteAsync(url)
                         .ConfigureAwait(false);
         }
+
+        public async Task<Result<IEnumerable<RegionLookup>>> GetLookup()
+        {
+            var url = $"{_endpoint}/Lookup";
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            var regions = await _request
+                .SendAsync<IEnumerable<RegionLookup>>(request)
+                .ConfigureAwait(false);
+
+            var zeroRegion = new RegionLookup
+            {
+                Id = 0,
+                Name = string.Empty,
+            };
+
+            var list = regions.Data.ToList();
+
+            list.Add(zeroRegion);
+
+            regions.Data = list;
+
+            return regions;
+        }
     }
 }
