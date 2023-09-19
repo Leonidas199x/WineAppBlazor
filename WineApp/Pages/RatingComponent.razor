@@ -1,0 +1,80 @@
+﻿@inject WineApp.Domain.Drinker.IDrinkerService DrinkerService
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <HxAlert Color="ThemeColor.Danger">@errorMessage</HxAlert>
+}
+
+<EditForm 
+    Model="@RatingViewModel"
+    OnValidSubmit=@Save>
+    <DataAnnotationsValidator />
+    <HxSelect 
+        TItem="DataContract.Drinker"
+        TValue="int"
+        Label="Drinker"
+        Data="@drinkers"
+        @bind-Value="@RatingViewModel.DrinkerId"
+        TextSelector="@(p => p.Name)"
+        ValueSelector="@(p => p.Id)"
+        Nullable="true"
+        NullDataText="Loading Drinkers..." />
+    <HxInputNumber 
+        LabelType="LabelType.Floating" 
+        ValidationMessageMode="ValidationMessageMode.None" 
+        @bind-Value="@RatingViewModel.Rating" 
+        Label="Rating" />
+    <div class="modal-footer">
+        <table>
+            <tr>
+                <td>
+                    <HxSubmit 
+                        Text="Save" 
+                        Color="ThemeColor.Primary" />
+                </td>
+                <td>
+                    <HxButton 
+                        Text="Cancel" 
+                        Color="ThemeColor.Danger" 
+                        OnClick="Cancel" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public RatingViewModel RatingViewModel { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback<RatingViewModel> OnSave { get; set; }
+
+    IEnumerable<Drinker> drinkers;
+    string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await DrinkerService.GetLookup().ConfigureAwait(false);
+        if (!result.IsSuccess)
+        {
+            errorMessage = result.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+
+        drinkers = result.Data;
+    }
+
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync().ConfigureAwait(false);
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancel.InvokeAsync().ConfigureAwait(false);
+    }
+}
