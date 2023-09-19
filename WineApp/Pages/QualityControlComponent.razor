@@ -1,4 +1,5 @@
 ﻿@inject WineApp.Domain.QualityControl.IQualityControlService QualityControlService
+@inject WineApp.Domain.Countries.ICountryService CountryService
 @inject IQualityControlMapper QualityControlMapper
 
 @page "/QualityControllers"
@@ -105,7 +106,7 @@
                         <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
                     </td>
                     <td>
-                        <HxButton Text="Cancel" Color="ThemeColor.Dark" OnClick="CloseDeleteModal" />
+                        <HxButton Text="Cancel" Color="ThemeColor.Secondary" OnClick="CloseDeleteModal" />
                     </td>
                 </tr>
             </table>
@@ -124,10 +125,26 @@
         <EditForm Model="@editableModel"
                   OnValidSubmit=@Save>
             <DataAnnotationsValidator />
-            <HxInputText LabelType="LabelType.Floating"
-                         ValidationMessageMode="ValidationMessageMode.None"
-            @bind-Value="@editableModel.Name"
-                         Label="@entity" />
+            <HxInputText 
+                LabelType="LabelType.Floating"
+                ValidationMessageMode="ValidationMessageMode.None"
+                @bind-Value="@editableModel.Name"
+                Label="@entity" />
+            <HxInputText 
+                LabelType="LabelType.Floating"
+                ValidationMessageMode="ValidationMessageMode.None"
+                @bind-Value="@editableModel.Note"
+                Label="Note" />
+            <HxSelect 
+                TItem="CountryLookup"
+                TValue="int"
+                Label="Country"
+                Data="@countries"
+                @bind-Value="@editableModel.Country.Id"
+                TextSelector="@(p => p.Name)"
+                ValueSelector="@(p => p.Id)"
+                Nullable="true"
+                NullDataText="Loading Countries..." />
             <div class="modal-footer">
                 <table>
                     <tr>
@@ -168,6 +185,7 @@
     int deleteId;
     string modalText = string.Empty;
     string entity = "Quality Control";
+    IEnumerable<CountryLookup> countries = new List<CountryLookup>();
 
     private async Task<GridDataProviderResult<QualityControl>> GetGridData(GridDataProviderRequest<QualityControl> request)
     {
@@ -251,6 +269,7 @@
         {
             modalText = $"Edit {entity}";
             await SetEdit(true).ConfigureAwait(false);
+            await SetCountries().ConfigureAwait(false);
             await ClearEditError().ConfigureAwait(false);
 
             var result = await QualityControlService.Get(value.Id).ConfigureAwait(false);
@@ -311,16 +330,16 @@
 
     private async Task<Result> SaveEdit()
     {
-        var colour = QualityControlMapper.Map(editableModel);
+        var qualityControl = QualityControlMapper.Map(editableModel);
 
-        return await QualityControlService.Put(colour).ConfigureAwait(false);
+        return await QualityControlService.Put(qualityControl).ConfigureAwait(false);
     }
 
     private async Task<Result> SaveNew()
     {
-        var wineType = QualityControlMapper.MapNew(editableModel);
+        var qualityControl = QualityControlMapper.MapNew(editableModel);
 
-        return await QualityControlService.Post(wineType).ConfigureAwait(false);
+        return await QualityControlService.Post(qualityControl).ConfigureAwait(false);
     }
 
     private async Task ShowCreateModal()
@@ -421,5 +440,18 @@
         }
 
         await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+    }
+
+    private async Task SetCountries()
+    {
+        var countriesResult = await CountryService.GetLookup().ConfigureAwait(false);
+        if (!countriesResult.IsSuccess)
+        {
+            editError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
+        countries = countriesResult.Data;
     }
 }
