@@ -21,6 +21,15 @@ namespace WineApp.Domain.Wine
                 .ConfigureAwait(false);
         }
 
+        public async Task<Result<DataContract.Wine>> Get(int id)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_endpoint}/{id}");
+
+            return await _request
+                .SendAsync<DataContract.Wine>(request)
+                .ConfigureAwait(false);
+        }
+
         public async Task<Result<PagedList<IEnumerable<WineHeader>>>> Search(string name, int page, int pageSize)
         {
             var url = $"{_endpoint}/search?name={name}&page={page}&pageSize={pageSize}";
