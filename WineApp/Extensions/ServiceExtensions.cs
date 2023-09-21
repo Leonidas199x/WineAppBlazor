@@ -11,6 +11,7 @@ using WineApp.Domain.VineyardEstate;
 using WineApp.Domain.WineType;
 using WineApp.Domain.Wine;
 using WineApp.Domain.QualityControl;
+using WineApp.Domain.Rating;
 
 namespace WineApp.Extensions
 {
@@ -30,6 +31,7 @@ namespace WineApp.Extensions
             services.AddTransient<IWineTypeService, WineTypeService>();
             services.AddTransient<IWineService, WineService>();
             services.AddTransient<IQualityControlService, QualityControlService>();
+            services.AddTransient<IRatingService, RatingService>();
         }
 
         public static void RegisterUserMappers(this IServiceCollection services) 
