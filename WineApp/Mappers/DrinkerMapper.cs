@@ -31,16 +31,16 @@ namespace WineApp.Mappers
             };
         }
 
-        public static IEnumerable<DrinkerSelectViewModel> Map(IEnumerable<Drinker> value)
+        public static IEnumerable<DrinkerSelect> Map(IEnumerable<Drinker> value)
         {
             return value.Select(x => MapSelect(x));
         }
 
-        public static DrinkerSelectViewModel MapSelect(Drinker value)
+        public static DrinkerSelect MapSelect(Drinker value)
         {
-            return new DrinkerSelectViewModel
+            return new DrinkerSelect
             {
-                Id = value.Id,
+                Id = (value.Id == 0) ? null : value.Id,
                 Name = value.Name,
             };
         }
