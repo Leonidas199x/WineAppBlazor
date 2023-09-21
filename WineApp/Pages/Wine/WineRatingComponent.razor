@@ -1,4 +1,6 @@
-﻿<HxButton Color="ThemeColor.Primary" OnClick="Create" Icon="@BootstrapIcon.Plus" />
+﻿@inject WineApp.Domain.Rating.IRatingService RatingService
+
+<HxButton Color="ThemeColor.Primary" OnClick="Create" Icon="@BootstrapIcon.Plus" />
 <div class="spacer" />
 @if (hasRatings)
 {
@@ -43,10 +45,20 @@
     }
     else if (isEdit)
     {
+        @if (!string.IsNullOrWhiteSpace(saveError))
+        {
+            <HxAlert Color="ThemeColor.Danger">@saveError</HxAlert>
+        }
+
         <RatingComponent RatingViewModel="@ratingViewModel" OnCancel="CancelEdit" OnSave="Save"/>
     }
     else if (isCreate)
     {
+        @if (!string.IsNullOrWhiteSpace(saveError))
+        {
+            <HxAlert Color="ThemeColor.Danger">@saveError</HxAlert>
+        }
+
         <RatingComponent RatingViewModel="@ratingViewModel" OnCancel="CancelCreate" OnSave="Save"/>
     }
     else if (isDelete)
@@ -96,6 +108,8 @@ else
     int drinkerRating;
     string drinker = string.Empty;
     RatingViewModel ratingViewModel = new RatingViewModel();
+    string saveError = string.Empty;
+    int? deleteId = null;
 
     protected override void OnInitialized()
     {
@@ -135,12 +149,7 @@ else
         isCreate = false;
         isDelete = false;
 
-        ratingViewModel = new RatingViewModel
-            {
-                Id = rating.Id,
-                DrinkerId = rating.Drinker.Id,
-                Rating = rating.Rating,
-            };
+        ratingViewModel = RatingMapper.Map(rating);
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
@@ -151,7 +160,10 @@ else
         isCreate = true;
         isDelete = false;
 
-        ratingViewModel = new RatingViewModel();
+        ratingViewModel = new RatingViewModel()
+            {
+                WineId = Wine.Id,
+            };
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
@@ -164,44 +176,87 @@ else
 
         drinkerRating = rating.Rating;
         drinker = rating.Drinker.Name;
+        deleteId = rating.Id;
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 
     private async Task DeleteRating()
     {
+        if (deleteId == null)
+        {
+            return;
+        }
 
+        var deleteResult = await RatingService.Delete(deleteId.Value).ConfigureAwait(false);
+        if (!deleteResult.IsSuccess)
+        {
+            return;
+        }
+
+        await RefreshRatings().ConfigureAwait(false);
     }
 
     private async Task CancelEdit()
     {
-        isEdit = false;
-        isCreate = false;
-        isDelete = false;
+        Reset();
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 
     private async Task CancelCreate()
     {
-        isEdit = false;
-        isCreate = false;
-        isDelete = false;
+        Reset();
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 
     private async Task CancelDelete()
     {
-        isEdit = false;
-        isCreate = false;
-        isDelete = false;
+        Reset();
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 
-    private async Task Save(RatingViewModel rating)
+    private async Task Save()
     {
-        
+        var rating = RatingMapper.Map(ratingViewModel);
+
+        var result = (isEdit)
+                        ? await RatingService.Put(rating).ConfigureAwait(false)
+                        : await RatingService.Post(rating).ConfigureAwait(false);
+
+        if (!result.IsSuccess)
+        {
+            saveError = result.Error;
+            return;
+        }
+
+        await RefreshRatings().ConfigureAwait(false);
+    }
+
+    private async Task RefreshRatings()
+    {
+        var ratingResult = await RatingService.GetByWineId(Wine.Id).ConfigureAwait(false);
+        if (!ratingResult.IsSuccess)
+        {
+            saveError = ratingResult.Error;
+            return;
+        }
+
+        Wine.Ratings = ratingResult.Data;
+
+        await InvokeAsync(ratingsGrid.RefreshDataAsync).ConfigureAwait(false);
+
+        Reset();
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private void Reset()
+    {
+        isEdit = false;
+        isCreate = false;
+        isDelete = false;
     }
 }
