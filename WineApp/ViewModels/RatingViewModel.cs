@@ -11,5 +11,7 @@ namespace WineApp.ViewModels
 
         [Required]
         public int Rating { get; set; }
+
+        public int WineId { get; set; }
     }
 }
