@@ -3,9 +3,9 @@ using WineApp.ViewModels;
 
 namespace WineApp.Mappers
 {
-    public class DrinkerMapper : IDrinkerMapper
+    public static class DrinkerMapper
     {
-        public DrinkerViewModel Map(Drinker value)
+        public static DrinkerViewModel Map(Drinker value)
         {
             return new DrinkerViewModel
             {
@@ -14,7 +14,7 @@ namespace WineApp.Mappers
             };
         }
 
-        public Drinker Map(DrinkerViewModel value)
+        public static Drinker Map(DrinkerViewModel value)
         {
             return new Drinker
             {
@@ -23,10 +23,24 @@ namespace WineApp.Mappers
             };
         }
 
-        public DrinkerCreate MapNew(DrinkerViewModel value)
+        public static DrinkerCreate MapNew(DrinkerViewModel value)
         {
             return new DrinkerCreate
             {
+                Name = value.Name,
+            };
+        }
+
+        public static IEnumerable<DrinkerSelectViewModel> Map(IEnumerable<Drinker> value)
+        {
+            return value.Select(x => MapSelect(x));
+        }
+
+        public static DrinkerSelectViewModel MapSelect(Drinker value)
+        {
+            return new DrinkerSelectViewModel
+            {
+                Id = value.Id,
                 Name = value.Name,
             };
         }
