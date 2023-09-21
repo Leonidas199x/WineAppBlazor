@@ -10,15 +10,15 @@
     OnValidSubmit=@Save>
     <DataAnnotationsValidator />
     <HxSelect 
-        TItem="DataContract.Drinker"
-        TValue="int"
+        TItem="DrinkerSelect"
+        TValue="int?"
         Label="Drinker"
         Data="@drinkers"
-        @bind-Value="@RatingViewModel.DrinkerId"
+        @bind-Value="@drinkerId"
         TextSelector="@(p => p.Name)"
         ValueSelector="@(p => p.Id)"
         Nullable="true"
-        NullDataText="Loading Drinkers..." />
+        NullDataText="Loading Drinkers..."/>
     <HxInputNumber 
         LabelType="LabelType.Floating" 
         ValidationMessageMode="ValidationMessageMode.None" 
@@ -53,8 +53,9 @@
     [Parameter]
     public EventCallback<RatingViewModel> OnSave { get; set; }
 
-    IEnumerable<Drinker> drinkers;
+    IEnumerable<DrinkerSelect> drinkers;
     string errorMessage = string.Empty;
+    int? drinkerId = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,11 +66,14 @@
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
 
-        drinkers = result.Data;
+        drinkerId = RatingViewModel.DrinkerId == 0 ? null : RatingViewModel.DrinkerId;
+
+        drinkers = DrinkerMapper.Map(result.Data);
     }
 
     private async Task Save()
     {
+        RatingViewModel.DrinkerId = drinkerId.Value;
         await OnSave.InvokeAsync().ConfigureAwait(false);
     }
 
