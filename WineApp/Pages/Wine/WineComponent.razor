@@ -26,20 +26,7 @@ else
                     <table>
                         <tr>
                             <td>
-                                @for(int i = 0; i <= (averageRating-1); i++)
-                                {
-                                    <span class="fas fa-star"></span>
-                                }
-
-                                @if (showHalfStar)
-                                {
-                                    <span class="fas fa-star-half-alt"></span>
-                                }
-
-                                @for(int i = 0; i <= emptyStars; i++)
-                                {
-                                    <span class="far fa-star"></span>
-                                }
+                                <MudRating SelectedValue="@averageRating" MaxValue="10" ReadOnly="true"/>
                             </td>
                             <td>
                                 <img class="flag-wine-view" src="@flagLocation" alt="Sorry, a flag for @Wine.Region.Country.IsoCode is not currently available." />
@@ -137,7 +124,7 @@ else
     DataContract.Wine Wine = new Wine();
     Uri? flagLocation;
     bool flagExists = false;
-    decimal averageRating;
+    int averageRating;
     bool isEdit = false;
     IEnumerable<RegionLookup>? regions;
     bool showHalfStar = false;
@@ -187,12 +174,13 @@ else
         }
     }
 
-    private decimal GetAverageRating()
+    private int GetAverageRating()
     {
         if (Wine.Ratings.Any())
         {
-            decimal ratingTotal = Wine.Ratings.Sum(x => x.Rating);
-            decimal count = Wine.Ratings.Count();
+            int ratingTotal = Wine.Ratings.Sum(x => x.Rating);
+            int count = Wine.Ratings.Count();
+
             return ratingTotal / count;
         }
 
