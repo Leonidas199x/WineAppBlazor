@@ -1,5 +1,4 @@
 ﻿@inject WineApp.Domain.Wine.IWineService WineService
-@inject WineApp.Domain.Region.IRegionService RegionService
 
 @if(isLoading)
 {
@@ -23,79 +22,33 @@ else
                 Title="Overview"
                 OnTabActivated="SetAverageRating">
                 <Content>
-                    <div class="spacer" />
-                    <table>
+                    <div class="fade-in">
+                        <div class="spacer" />
                         @if (Wine.Ratings.Any())
                         {
-                            <tr>
-                                <td>
-                                    <MudRating SelectedValue="@averageRating"
-                                               MaxValue="10"
-                                               ReadOnly="true" />
-                                </td>
-                                @* <td>
-                    <img class="flag-wine-view" src="@flagLocation" alt="Sorry, a flag for @Wine.Region.Country.IsoCode is not currently available." />
-                    </td> *@
-                            </tr>
+                            <MudRating SelectedValue="@averageRating"
+                                       MaxValue="10"
+                                       ReadOnly="true" />
                         }
-                        <tr>
-                            <td>
-                                <div class="spacer" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <HxInputText LabelType="LabelType.Regular" Label="Name" @bind-Value="@Wine.Description" Enabled="@isEdit" CssClass="input"></HxInputText>
-                            </td>
-                            <td>
-                                <HxInputNumber LabelType="LabelType.Regular" Label="ABV" @bind-Value="@Wine.Abv" Enabled="@isEdit" CssClass="input">
-                                    <InputGroupStartTemplate>
-                                        <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Percent" />
-                                    </InputGroupStartTemplate>
-                                </HxInputNumber>
-                            </td>
-                            <td>
-                                <HxSelect 
-                                    TItem="RegionLookup"
-                                    TValue="int"
-                                    Label="Region"
-                                    Data="@regions"
-                                    @bind-Value="@Wine.Region.Id"
-                                    TextSelector="@(p => p.Name)"
-                                    ValueSelector="@(p => p.Id)"
-                                    Nullable="true"
-                                    NullDataText="Loading Regions..."
-                                    Enabled="@isEdit"
-                                    CssClass="input"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <HxInputText LabelType="LabelType.Regular" Label="Importer" @bind-Value="@Wine.Importer" Enabled="@isEdit" CssClass="input"></HxInputText>
-                            </td>
-                            <td>
-                                <HxInputNumber LabelType="LabelType.Regular" Label="Inventory Level" @bind-Value="@Wine.InventoryLevel" Enabled="@isEdit" CssClass="inputCss">
-                                    <InputGroupStartTemplate>
-                                        <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Plus" />
-                                    </InputGroupStartTemplate>
-                                </HxInputNumber>
-                            </td>
-                        </tr>
-                    </table>
+                        <div class="spacer" />
+                        <WineDetailComponent Wine="@Wine"/>
+                    </div>
                 </Content>
             </HxTab>
             <HxTab 
                 Id="vineyard"
                 Title="Vineyard Estate">
                 <Content>
-                    <div class="spacer" />
-                    <p>@Wine.Description is from the @Wine.Region.Name region of @Wine.Region.Country.Name</p>
-                    <p>Below is a map, which shows the location of the vineyard '@Wine.VineyardEstate.Name' where @Wine.Description is produced by @Wine.Producer.Name.</p>
-                    <MapComponent 
-                        Latitude="@Wine.VineyardEstate.Latitude" 
-                        Longitude="@Wine.VineyardEstate.Longitude" 
-                        Location="@Wine.VineyardEstate.Name"
-                        GetCoordinates=false />
+                    <div class="fade-in">
+                        <div class="spacer" />
+                        <p>@Wine.Description is from the @Wine.Region.Name region of @Wine.Region.Country.Name</p>
+                        <p>Below is a map, which shows the location of the vineyard '@Wine.VineyardEstate.Name' where @Wine.Description is produced by @Wine.Producer.Name.</p>
+                        <MapComponent 
+                            Latitude="@Wine.VineyardEstate.Latitude" 
+                            Longitude="@Wine.VineyardEstate.Longitude" 
+                            Location="@Wine.VineyardEstate.Name"
+                            GetCoordinates=false />
+                    </div>
                 </Content>
             </HxTab>
             <HxTab 
@@ -134,7 +87,6 @@ else
     bool flagExists = false;
     int averageRating;
     bool isEdit = false;
-    IEnumerable<RegionLookup>? regions;
     bool showHalfStar = false;
     int emptyStars = 0;
 
@@ -156,16 +108,6 @@ else
             showHalfStar = !decimal.IsInteger(averageRating);
             var wholeStars = Convert.ToInt32(averageRating);
             emptyStars = showHalfStar ? (9 - wholeStars) : (10 - wholeStars);
-
-            var regionResult = await RegionService.GetLookup().ConfigureAwait(false);
-            if (!regionResult.IsSuccess)
-            {
-                errorString = result.Error;
-                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-                return;
-            }
-
-            regions = regionResult.Data;
 
             var flagString = $"{NavigationManager.BaseUri}/images/flags/{Wine.Region.Country.IsoCode.ToLower()}.svg";
             flagLocation = new Uri(flagString);
