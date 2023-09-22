@@ -53,10 +53,11 @@ else
             </HxTab>
             <HxTab 
                 Id="ratings"
-                Title="Ratings">
+                Title="Ratings"
+                TitleTemplate="RatingsFragment">
                 <Content>
                     <div class="spacer" />
-                    <WineRatingComponent Wine="@Wine" />
+                    <WineRatingComponent Wine="@Wine" OnSave="UpdateBadges" OnDelete="UpdateBadges"/>
                 </Content>
             </HxTab>
             <HxTab 
@@ -65,10 +66,11 @@ else
             </HxTab>
             <HxTab 
                 Id="issues"
-                Title="Issues">
+                Title="Issues"
+                   TitleTemplate="IssuesFragment">
                 <Content>
                     <div class="spacer" />
-                    <WineIssueComponent Wine="@Wine" />
+                    <WineIssueComponent Wine="@Wine" OnSave="UpdateBadges" OnDelete="UpdateBadges" />
                 </Content>
             </HxTab>
             <HxTab 
@@ -92,6 +94,8 @@ else
     bool isEdit = false;
     bool showHalfStar = false;
     int emptyStars = 0;
+    RenderFragment RatingsFragment;
+    RenderFragment IssuesFragment;
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,6 +121,8 @@ else
 
             isLoading = false;
 
+            UpdateBadges();
+
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }
         catch
@@ -125,6 +131,19 @@ else
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
             return;
         }
+    }
+
+    private void UpdateBadges()
+    {
+        RatingsFragment = (__builder) =>
+        {
+            <HxBadge Color="ThemeColor.Primary">@Wine.Ratings.Count()</HxBadge>
+        };
+
+        IssuesFragment = (__builder) =>
+        {
+            <HxBadge Color="ThemeColor.Primary">@Wine.Issues.Count()</HxBadge>
+        };
     }
 
     private async Task SetAverageRating()

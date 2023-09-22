@@ -84,6 +84,12 @@ else if (isDelete)
     [Parameter]
     public Wine Wine { get; set; }
 
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
     private HxGrid<WineRating> ratingsGrid = new HxGrid<WineRating>();
     private HxModal addEditRating = new HxModal();
     int resultsPerPage = 10;
@@ -179,6 +185,8 @@ else if (isDelete)
         }
 
         await RefreshRatings().ConfigureAwait(false);
+
+        await InvokeAsync(OnDelete.InvokeAsync).ConfigureAwait(false);
     }
 
     private async Task CancelEdit()
@@ -217,6 +225,8 @@ else if (isDelete)
         }
 
         await RefreshRatings().ConfigureAwait(false);
+
+        await InvokeAsync(OnSave.InvokeAsync).ConfigureAwait(false);
     }
 
     private async Task RefreshRatings()

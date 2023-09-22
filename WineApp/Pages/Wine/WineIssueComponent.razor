@@ -86,6 +86,12 @@ else if (isDelete)
     [Parameter]
     public Wine Wine { get; set; }
 
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
     private HxGrid<Issue> issueGrid = new HxGrid<Issue>();
     int resultsPerPage = 10;
     int TotalPages = 0;
@@ -180,6 +186,8 @@ else if (isDelete)
         await RefreshIssues().ConfigureAwait(false);
 
         Reset();
+
+        await InvokeAsync(OnDelete.InvokeAsync).ConfigureAwait(false);
     }
 
     private async Task CancelEdit()
@@ -218,6 +226,8 @@ else if (isDelete)
         }
 
         await RefreshIssues().ConfigureAwait(false);
+
+        await InvokeAsync(OnSave.InvokeAsync).ConfigureAwait(false);
     }
 
     private async Task RefreshIssues()
