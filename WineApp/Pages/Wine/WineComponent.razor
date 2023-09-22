@@ -20,17 +20,21 @@ else
             RenderMode="TabPanelRenderMode.ActiveTabOnly">
             <HxTab 
                 Id="overview"
-                Title="Overview">
+                Title="Overview"
+                OnTabActivated="SetAverageRating">
                 <Content>
                     <div class="spacer" />
                     <table>
                         <tr>
                             <td>
-                                <MudRating SelectedValue="@averageRating" MaxValue="10" ReadOnly="true"/>
+                                <MudRating 
+                                    SelectedValue="@averageRating" 
+                                    MaxValue="10" 
+                                    ReadOnly="true"/>
                             </td>
-                            <td>
+                            @* <td>
                                 <img class="flag-wine-view" src="@flagLocation" alt="Sorry, a flag for @Wine.Region.Country.IsoCode is not currently available." />
-                            </td>
+                            </td> *@
                         </tr>
                         <tr>
                             <td>
@@ -39,10 +43,10 @@ else
                         </tr>
                         <tr>
                             <td>
-                                <HxInputText LabelType="LabelType.Regular" Label="Name" @bind-Value="@Wine.Description" Enabled="@isEdit"></HxInputText>
+                                <HxInputText LabelType="LabelType.Regular" Label="Name" @bind-Value="@Wine.Description" Enabled="@isEdit" CssClass="input"></HxInputText>
                             </td>
                             <td>
-                                <HxInputNumber LabelType="LabelType.Regular" Label="ABV" @bind-Value="@Wine.Abv" Enabled="@isEdit" >
+                                <HxInputNumber LabelType="LabelType.Regular" Label="ABV" @bind-Value="@Wine.Abv" Enabled="@isEdit" CssClass="input">
                                     <InputGroupStartTemplate>
                                         <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Percent" />
                                     </InputGroupStartTemplate>
@@ -59,15 +63,16 @@ else
                                     ValueSelector="@(p => p.Id)"
                                     Nullable="true"
                                     NullDataText="Loading Regions..."
-                                    Enabled="@isEdit"/>
+                                    Enabled="@isEdit"
+                                    CssClass="input"/>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <HxInputText LabelType="LabelType.Regular" Label="Importer" @bind-Value="@Wine.Importer" Enabled="@isEdit"></HxInputText>
+                                <HxInputText LabelType="LabelType.Regular" Label="Importer" @bind-Value="@Wine.Importer" Enabled="@isEdit" CssClass="input"></HxInputText>
                             </td>
                             <td>
-                                <HxInputNumber LabelType="LabelType.Regular" Label="Inventory Level" @bind-Value="@Wine.InventoryLevel" Enabled="@isEdit">
+                                <HxInputNumber LabelType="LabelType.Regular" Label="Inventory Level" @bind-Value="@Wine.InventoryLevel" Enabled="@isEdit" CssClass="inputCss">
                                     <InputGroupStartTemplate>
                                         <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Plus" />
                                     </InputGroupStartTemplate>
@@ -96,7 +101,8 @@ else
                 Title="Ratings">
                 <Content>
                     <div class="spacer" />
-                    <WineRatingComponent Wine="@Wine"/>
+                    <WineRatingComponent 
+                        Wine="@Wine" />
                 </Content>
             </HxTab>
             <HxTab 
@@ -143,7 +149,7 @@ else
             }
 
             Wine = result.Data;
-            averageRating = GetAverageRating();
+            await SetAverageRating().ConfigureAwait(false);
 
             showHalfStar = !decimal.IsInteger(averageRating);
             var wholeStars = Convert.ToInt32(averageRating);
@@ -174,16 +180,18 @@ else
         }
     }
 
-    private int GetAverageRating()
+    private async Task SetAverageRating()
     {
+        averageRating = 0;
+
         if (Wine.Ratings.Any())
         {
             int ratingTotal = Wine.Ratings.Sum(x => x.Rating);
             int count = Wine.Ratings.Count();
 
-            return ratingTotal / count;
+            averageRating = (ratingTotal / count);
         }
 
-        return 0;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
     }
 }
