@@ -2,88 +2,81 @@
 
 <HxButton Color="ThemeColor.Primary" OnClick="Create" Icon="@BootstrapIcon.Plus" />
 <div class="spacer" />
-@if (hasRatings)
+@if(!string.IsNullOrEmpty(errorMessage))
 {
-    @if(!string.IsNullOrEmpty(errorMessage))
-    {
-        <HxAlert Color="ThemeColor.Danger">@errorMessage</HxAlert>
-    }
-
-    @if (!isEdit && !isCreate && !isDelete)
-    {
-        <div class="fade-in">
-            <HxGrid 
-                @ref="ratingsGrid"
-                TItem="WineRating"
-                Responsive="true"
-                DataProvider="GetRatings"
-                PageSize="10"
-                Striped="true">
-                <Columns>
-                    <HxGridColumn 
-                        HeaderText="Drinker"
-                        ItemTextSelector="@(item => item.Drinker.Name)"
-                        SortString="@nameof(WineRating.Drinker.Name)"
-                        IsDefaultSortColumn="true" />
-                    <HxGridColumn 
-                        HeaderText="Rating"
-                        ItemTextSelector="@(item => item.Rating.ToString())"
-                        SortString="@nameof(WineRating.Rating)" />
-                    <HxContextMenuGridColumn>
-                        <HxButton 
-                            Icon="BootstrapIcon.Pencil"
-                            Color="ThemeColor.Primary"
-                            OnClick="@(() => Edit(context))">
-                        </HxButton>
-                        <HxButton 
-                            Icon="BootstrapIcon.Trash"
-                            Color="ThemeColor.Secondary"
-                            OnClick="@(() => Delete(context))">
-                        </HxButton>
-                    </HxContextMenuGridColumn>
-                </Columns>
-            </HxGrid>
-        </div>
-    }
-    else if (isEdit || isCreate)
-    {
-        <div class="fade-in">
-            @if (!string.IsNullOrWhiteSpace(saveError))
-            {
-                <HxAlert Color="ThemeColor.Danger">@saveError</HxAlert>
-            }
-
-            <RatingComponent RatingViewModel="@ratingViewModel" OnCancel="CancelEdit" OnSave="Save" />
-        </div>
-    }
-    else if (isDelete)
-    {
-        <div class="fade-in">
-            <p>Are you sure you wish to delete the rating of @drinkerRating by @drinker?</p>
-            <div class="modal-footer">
-                <table>
-                    <tr>
-                        <td>
-                            <HxButton 
-                                Text="Delete" 
-                                Color="ThemeColor.Danger" 
-                                OnClick="DeleteRating" />
-                        </td>
-                        <td>
-                            <HxButton 
-                                Text="Cancel" 
-                                Color="ThemeColor.Secondary" 
-                                OnClick="CancelDelete" />
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    }
+    <HxAlert Color="ThemeColor.Danger">@errorMessage</HxAlert>
 }
-else
+
+@if (!isEdit && !isCreate && !isDelete)
 {
-    <p>No ratings. Press the + button above to add a rating for this wine.</p>
+    <div class="fade-in">
+        <HxGrid 
+            @ref="ratingsGrid"
+            TItem="WineRating"
+            Responsive="true"
+            DataProvider="GetRatings"
+            PageSize="10"
+            Striped="true">
+            <Columns>
+                <HxGridColumn 
+                    HeaderText="Drinker"
+                    ItemTextSelector="@(item => item.Drinker.Name)"
+                    SortString="@nameof(WineRating.Drinker.Name)"
+                    IsDefaultSortColumn="true" />
+                <HxGridColumn 
+                    HeaderText="Rating"
+                    ItemTextSelector="@(item => item.Rating.ToString())"
+                    SortString="@nameof(WineRating.Rating)" />
+                <HxContextMenuGridColumn>
+                    <HxButton 
+                        Icon="BootstrapIcon.Pencil"
+                        Color="ThemeColor.Primary"
+                        OnClick="@(() => Edit(context))">
+                    </HxButton>
+                    <HxButton 
+                        Icon="BootstrapIcon.Trash"
+                        Color="ThemeColor.Secondary"
+                        OnClick="@(() => Delete(context))">
+                    </HxButton>
+                </HxContextMenuGridColumn>
+            </Columns>
+        </HxGrid>
+    </div>
+}
+else if (isEdit || isCreate)
+{
+    <div class="fade-in">
+        @if (!string.IsNullOrWhiteSpace(saveError))
+        {
+            <HxAlert Color="ThemeColor.Danger">@saveError</HxAlert>
+        }
+
+        <RatingComponent RatingViewModel="@ratingViewModel" OnCancel="CancelEdit" OnSave="Save" />
+    </div>
+}
+else if (isDelete)
+{
+    <div class="fade-in">
+        <p>Are you sure you wish to delete the rating of @drinkerRating by @drinker?</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton 
+                            Text="Delete" 
+                            Color="ThemeColor.Danger" 
+                            OnClick="DeleteRating" />
+                    </td>
+                    <td>
+                        <HxButton 
+                            Text="Cancel" 
+                            Color="ThemeColor.Secondary" 
+                            OnClick="CancelDelete" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
 }
 
 
@@ -96,7 +89,6 @@ else
     int resultsPerPage = 10;
     int TotalPages = 0;
     bool ratingGridError = false;
-    bool hasRatings = false;
     string modalTitle = string.Empty;
     string errorMessage = string.Empty;
     bool isEdit = false;
@@ -107,11 +99,6 @@ else
     RatingViewModel ratingViewModel = new RatingViewModel();
     string saveError = string.Empty;
     int? deleteId = null;
-
-    protected override void OnInitialized()
-    {
-        hasRatings = Wine.Ratings.Any();
-    }
 
     private async Task<GridDataProviderResult<WineRating>> GetRatings(GridDataProviderRequest<WineRating> request)
     {
