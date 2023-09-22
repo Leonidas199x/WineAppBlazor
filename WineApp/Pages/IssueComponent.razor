@@ -1,0 +1,77 @@
+﻿@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <HxAlert Color="ThemeColor.Danger">@errorMessage</HxAlert>
+}
+
+<EditForm 
+    Model="@IssueViewModel"
+    OnValidSubmit=@Save>
+    <DataAnnotationsValidator />
+    <HxInputDate Label="Date" @bind-Value="@IssueViewModel.Date" Enabled="@IsEdit"/>
+    <HxInputNumber Label="Quantity" @bind-Value="@IssueViewModel.Quantity" Enabled="@IsEdit" />
+    <HxInputText Label="Issue Details" @bind-Value="@IssueViewModel.Note" Enabled="@IsEdit" />
+    <div class="modal-footer">
+        <table>
+            <tr>
+                @if (!IsEdit)
+                {
+                    <td>
+                        <HxButton 
+                            Text="Edit"
+                            Color="ThemeColor.Primary"
+                            CssClass="modal-button"
+                            OnClick="Edit"/>
+                    </td>
+                }
+                else
+                {
+                    <td>
+                        <HxSubmit 
+                            Text="Save"
+                            Color="ThemeColor.Primary"
+                            CssClass="modal-button" />
+                    </td>
+                }
+                <td>
+                    <HxButton 
+                        Text="Cancel"
+                        Color="ThemeColor.Danger"
+                        OnClick="Cancel" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public IssueViewModel IssueViewModel { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    [Parameter]
+    public bool IsEdit { get; set; } = false;
+
+    string errorMessage = string.Empty;
+
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync().ConfigureAwait(false);
+    }
+
+    private async Task Edit()
+    {
+        IsEdit = true;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancel.InvokeAsync().ConfigureAwait(false);
+    }
+}
