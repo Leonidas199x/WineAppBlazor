@@ -20,6 +20,7 @@ else
             <HxTab 
                 Id="overview"
                 Title="Overview"
+                TitleTemplate="OverViewFlag"
                 OnTabActivated="SetAverageRating">
                 <Content>
                     <div class="fade-in">
@@ -96,6 +97,7 @@ else
     int emptyStars = 0;
     RenderFragment RatingsFragment;
     RenderFragment IssuesFragment;
+    RenderFragment OverViewFlag;
 
     protected override async Task OnInitializedAsync()
     {
@@ -122,6 +124,11 @@ else
             isLoading = false;
 
             UpdateBadges();
+
+            OverViewFlag = (__builder) =>
+            {
+                <img class="flag-view" src="@flagLocation" />
+            };
 
             await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         }

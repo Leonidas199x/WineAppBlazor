@@ -78,11 +78,8 @@ a, .btn-link {
 }
 
 .flag-view {
-    width: 10rem !important;
-    height: 5rem;
-    display: block;
-    margin-left: 5px;
-    width: 5%;
+    width: 2rem !important;
+    height: 1rem;
 }
 
 .flag-wine-view {
