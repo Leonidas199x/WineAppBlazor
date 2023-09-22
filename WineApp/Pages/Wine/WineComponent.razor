@@ -90,11 +90,8 @@ else
     string errorString = string.Empty;
     DataContract.Wine Wine = new Wine();
     Uri? flagLocation;
-    bool flagExists = false;
     int averageRating;
     bool isEdit = false;
-    bool showHalfStar = false;
-    int emptyStars = 0;
     RenderFragment RatingsFragment;
     RenderFragment IssuesFragment;
     RenderFragment OverViewFlag;
@@ -113,10 +110,6 @@ else
 
             Wine = result.Data;
             await SetAverageRating().ConfigureAwait(false);
-
-            showHalfStar = !decimal.IsInteger(averageRating);
-            var wholeStars = Convert.ToInt32(averageRating);
-            emptyStars = showHalfStar ? (9 - wholeStars) : (10 - wholeStars);
 
             var flagString = $"{NavigationManager.BaseUri}/images/flags/{Wine.Region.Country.IsoCode.ToLower()}.svg";
             flagLocation = new Uri(flagString);
