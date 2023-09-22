@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Havit.Blazor.Components.Web.Bootstrap" Version="4.1.1" />
-    <PackageReference Include="Microsoft.Fast.Components.FluentUI" Version="3.0.0-RC.1" />
+    <PackageReference Include="Havit.Blazor.Components.Web.Bootstrap" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Fast.Components.FluentUI" Version="3.0.1" />
     <PackageReference Include="MudBlazor" Version="6.10.0" />
     <PackageReference Include="WineApi.DataContract" Version="1.0.6" />
   </ItemGroup>
