@@ -56,8 +56,7 @@ else
                 Title="Ratings">
                 <Content>
                     <div class="spacer" />
-                    <WineRatingComponent 
-                        Wine="@Wine" />
+                    <WineRatingComponent Wine="@Wine" />
                 </Content>
             </HxTab>
             <HxTab 
@@ -67,6 +66,10 @@ else
             <HxTab 
                 Id="issues"
                 Title="Issues">
+                <Content>
+                    <div class="spacer" />
+                    <WineIssueComponent Wine="@Wine" />
+                </Content>
             </HxTab>
             <HxTab 
                 Id="orders"
