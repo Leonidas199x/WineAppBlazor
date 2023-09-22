@@ -1,0 +1,247 @@
+﻿@inject WineApp.Domain.Issue.IIssueService IssueService
+
+<HxButton Color="ThemeColor.Primary" OnClick="Create" Icon="@BootstrapIcon.Plus" />
+<div class="spacer" />
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <HxAlert Color="ThemeColor.Danger">@errorMessage</HxAlert>
+}
+
+@if (!isEdit && !isCreate && !isDelete)
+{
+    <div class="fade-in">
+        <HxGrid @ref="issueGrid"
+                TItem="Issue"
+                Responsive="true"
+                DataProvider="GetIssues"
+                PageSize="10"
+                Striped="true">
+            <Columns>
+                <HxGridColumn 
+                    HeaderText="Date"
+                    ItemTextSelector="@(item => item.Date.ToString("dd/MM/yyyy"))"
+                    IsDefaultSortColumn="true" />
+                <HxGridColumn 
+                    HeaderText="Quantity"
+                    ItemTextSelector="@(item => item.Quantity.ToString())" />
+                <HxContextMenuGridColumn>
+                    <HxButton 
+                        Icon="BootstrapIcon.Eye"
+                        Color="ThemeColor.Primary"
+                        OnClick="@(() => Edit(context))">
+                    </HxButton>
+                    <HxButton 
+                        Icon="BootstrapIcon.Trash"
+                        Color="ThemeColor.Secondary"
+                        OnClick="@(() => Delete(context))">
+                    </HxButton>
+                </HxContextMenuGridColumn>
+            </Columns>
+        </HxGrid>
+    </div>
+}
+else if (isEdit || isCreate)
+{
+    <div class="fade-in">
+        @if (!string.IsNullOrWhiteSpace(saveError))
+        {
+            <HxAlert Color="ThemeColor.Danger">@saveError</HxAlert>
+        }
+
+        <IssueComponent 
+            IssueViewModel="@issueViewModel" 
+            IsEdit="isCreate" 
+            OnCancel="CancelEdit" 
+            OnSave="Save" />
+    </div>
+}
+else if (isDelete)
+{
+    <div class="fade-in">
+        <p>Are you sure you wish to delete the issue from @deleteDay?</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton 
+                            Text="Delete"
+                            Color="ThemeColor.Danger"
+                            OnClick="DeleteIssue" 
+                            CssClass="modal-button"/>
+                    </td>
+                    <td>
+                        <HxButton 
+                            Text="Cancel"
+                            Color="ThemeColor.Secondary"
+                            OnClick="CancelDelete" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public Wine Wine { get; set; }
+
+    private HxGrid<Issue> issueGrid = new HxGrid<Issue>();
+    int resultsPerPage = 10;
+    int TotalPages = 0;
+    bool issueGridError = false;
+    string errorMessage = string.Empty;
+    bool isEdit = false;
+    bool isCreate = false;
+    bool isDelete = false;
+    IssueViewModel issueViewModel = new IssueViewModel();
+    string saveError = string.Empty;
+    int? deleteId = null;
+    string deleteDay = string.Empty;
+
+    private async Task<GridDataProviderResult<Issue>> GetIssues(GridDataProviderRequest<Issue> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            TotalPages = Wine.Issues.Count() / resultsPerPage;
+
+            return new GridDataProviderResult<Issue>
+                {
+                    Data = Wine.Issues,
+                    TotalCount = Wine.Issues.Count(),
+                };
+        }
+        catch (Exception)
+        {
+            issueGridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<Issue>();
+        }
+    }
+
+    private async Task Edit(Issue issue)
+    {
+        isEdit = true;
+        isCreate = false;
+        isDelete = false;
+
+        issueViewModel = IssueMapper.Map(issue);
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Create()
+    {
+        isEdit = false;
+        isCreate = true;
+        isDelete = false;
+
+        issueViewModel = new IssueViewModel()
+            {
+                WineId = Wine.Id,
+            };
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Delete(Issue issue)
+    {
+        isEdit = false;
+        isCreate = false;
+        isDelete = true;
+        deleteId = issue.Id;
+        deleteDay = issue.Date.ToString("dd/MM/yyyy");
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task DeleteIssue()
+    {
+        if (deleteId == null)
+        {
+            return;
+        }
+
+        var deleteResult = await IssueService.Delete(deleteId.Value).ConfigureAwait(false);
+        if (!deleteResult.IsSuccess)
+        {
+            errorMessage = deleteResult.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
+        await RefreshIssues().ConfigureAwait(false);
+
+        Reset();
+    }
+
+    private async Task CancelEdit()
+    {
+        Reset();
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CancelCreate()
+    {
+        Reset();
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CancelDelete()
+    {
+        Reset();
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Save()
+    {
+        var issue = IssueMapper.Map(issueViewModel);
+
+        var result = (isEdit)
+                        ? await IssueService.Put(issue).ConfigureAwait(false)
+                        : await IssueService.Post(issue).ConfigureAwait(false);
+
+        if (!result.IsSuccess)
+        {
+            saveError = result.Error;
+            return;
+        }
+
+        await RefreshIssues().ConfigureAwait(false);
+    }
+
+    private async Task RefreshIssues()
+    {
+        var issueResult = await IssueService.GetByWineId(Wine.Id).ConfigureAwait(false);
+        if (!issueResult.IsSuccess)
+        {
+            saveError = issueResult.Error;
+            return;
+        }
+
+        Wine.Issues = issueResult.Data;
+
+        await InvokeAsync(issueGrid.RefreshDataAsync).ConfigureAwait(false);
+
+        Reset();
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private void Reset()
+    {
+        isEdit = false;
+        isCreate = false;
+        isDelete = false;
+    }
+}
