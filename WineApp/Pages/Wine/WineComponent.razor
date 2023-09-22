@@ -25,17 +25,19 @@ else
                 <Content>
                     <div class="spacer" />
                     <table>
-                        <tr>
-                            <td>
-                                <MudRating 
-                                    SelectedValue="@averageRating" 
-                                    MaxValue="10" 
-                                    ReadOnly="true"/>
-                            </td>
-                            @* <td>
-                                <img class="flag-wine-view" src="@flagLocation" alt="Sorry, a flag for @Wine.Region.Country.IsoCode is not currently available." />
-                            </td> *@
-                        </tr>
+                        @if (Wine.Ratings.Any())
+                        {
+                            <tr>
+                                <td>
+                                    <MudRating SelectedValue="@averageRating"
+                                               MaxValue="10"
+                                               ReadOnly="true" />
+                                </td>
+                                @* <td>
+                    <img class="flag-wine-view" src="@flagLocation" alt="Sorry, a flag for @Wine.Region.Country.IsoCode is not currently available." />
+                    </td> *@
+                            </tr>
+                        }
                         <tr>
                             <td>
                                 <div class="spacer" />
