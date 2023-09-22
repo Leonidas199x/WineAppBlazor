@@ -10,6 +10,7 @@ namespace WineApp.ViewModels
         public int DrinkerId { get; set; }
 
         [Required]
+        [Range(0, 10, ErrorMessage = "Rating must be between 0 and 10.")]
         public int Rating { get; set; }
 
         public int WineId { get; set; }
