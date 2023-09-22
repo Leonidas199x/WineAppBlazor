@@ -11,76 +11,73 @@
 
     @if (!isEdit && !isCreate && !isDelete)
     {
-        <HxGrid 
-            @ref="ratingsGrid"
-            TItem="WineRating"
-            Responsive="true"
-            DataProvider="GetRatings"
-            PageSize="10"
-            Striped="true">
-            <Columns>
-                <HxGridColumn 
-                    HeaderText="Drinker"
-                    ItemTextSelector="@(item => item.Drinker.Name)"
-                    SortString="@nameof(WineRating.Drinker.Name)"
-                    IsDefaultSortColumn="true" />
-                <HxGridColumn 
-                    HeaderText="Rating"
-                    ItemTextSelector="@(item => item.Rating.ToString())"
-                    SortString="@nameof(WineRating.Rating)" />
-                <HxContextMenuGridColumn>
-                    <HxButton 
-                        Icon="BootstrapIcon.Pencil"
-                        Color="ThemeColor.Primary"
-                        OnClick="@(() => Edit(context))">
-                    </HxButton>
-                    <HxButton 
-                        Icon="BootstrapIcon.Trash"
-                        Color="ThemeColor.Secondary"
-                        OnClick="@(() => Delete(context))">
-                    </HxButton>
-                </HxContextMenuGridColumn>
-            </Columns>
-        </HxGrid>
+        <div class="fade-in">
+            <HxGrid 
+                @ref="ratingsGrid"
+                TItem="WineRating"
+                Responsive="true"
+                DataProvider="GetRatings"
+                PageSize="10"
+                Striped="true">
+                <Columns>
+                    <HxGridColumn 
+                        HeaderText="Drinker"
+                        ItemTextSelector="@(item => item.Drinker.Name)"
+                        SortString="@nameof(WineRating.Drinker.Name)"
+                        IsDefaultSortColumn="true" />
+                    <HxGridColumn 
+                        HeaderText="Rating"
+                        ItemTextSelector="@(item => item.Rating.ToString())"
+                        SortString="@nameof(WineRating.Rating)" />
+                    <HxContextMenuGridColumn>
+                        <HxButton 
+                            Icon="BootstrapIcon.Pencil"
+                            Color="ThemeColor.Primary"
+                            OnClick="@(() => Edit(context))">
+                        </HxButton>
+                        <HxButton 
+                            Icon="BootstrapIcon.Trash"
+                            Color="ThemeColor.Secondary"
+                            OnClick="@(() => Delete(context))">
+                        </HxButton>
+                    </HxContextMenuGridColumn>
+                </Columns>
+            </HxGrid>
+        </div>
     }
-    else if (isEdit)
+    else if (isEdit || isCreate)
     {
-        @if (!string.IsNullOrWhiteSpace(saveError))
-        {
-            <HxAlert Color="ThemeColor.Danger">@saveError</HxAlert>
-        }
+        <div class="fade-in">
+            @if (!string.IsNullOrWhiteSpace(saveError))
+            {
+                <HxAlert Color="ThemeColor.Danger">@saveError</HxAlert>
+            }
 
-        <RatingComponent RatingViewModel="@ratingViewModel" OnCancel="CancelEdit" OnSave="Save"/>
-    }
-    else if (isCreate)
-    {
-        @if (!string.IsNullOrWhiteSpace(saveError))
-        {
-            <HxAlert Color="ThemeColor.Danger">@saveError</HxAlert>
-        }
-
-        <RatingComponent RatingViewModel="@ratingViewModel" OnCancel="CancelCreate" OnSave="Save"/>
+            <RatingComponent RatingViewModel="@ratingViewModel" OnCancel="CancelEdit" OnSave="Save" />
+        </div>
     }
     else if (isDelete)
     {
-        <p>Are you sure you wish to delete the rating of @drinkerRating by @drinker?</p>
-        <div class="modal-footer">
-            <table>
-                <tr>
-                    <td>
-                        <HxButton 
-                            Text="Delete" 
-                            Color="ThemeColor.Danger" 
-                            OnClick="DeleteRating" />
-                    </td>
-                    <td>
-                        <HxButton 
-                            Text="Cancel" 
-                            Color="ThemeColor.Secondary" 
-                            OnClick="CancelDelete" />
-                    </td>
-                </tr>
-            </table>
+        <div class="fade-in">
+            <p>Are you sure you wish to delete the rating of @drinkerRating by @drinker?</p>
+            <div class="modal-footer">
+                <table>
+                    <tr>
+                        <td>
+                            <HxButton 
+                                Text="Delete" 
+                                Color="ThemeColor.Danger" 
+                                OnClick="DeleteRating" />
+                        </td>
+                        <td>
+                            <HxButton 
+                                Text="Cancel" 
+                                Color="ThemeColor.Secondary" 
+                                OnClick="CancelDelete" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     }
 }
