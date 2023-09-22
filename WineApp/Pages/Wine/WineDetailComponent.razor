@@ -1,0 +1,104 @@
+﻿@inject WineApp.Domain.Region.IRegionService RegionService
+@inject WineApp.Domain.Countries.ICountryService CountryService
+
+@if (!string.IsNullOrEmpty(errorString))
+{
+    <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+}
+@if (isLoading)
+{
+    <div class="center-loading">
+        <LoadingComponent />
+    </div>
+}
+else
+{
+    <EditForm
+        Model="@Wine">
+        <HxInputText LabelType="LabelType.Regular" Label="Name" @bind-Value="@Wine.Description" Enabled="@isEdit" CssClass="input"></HxInputText>
+        <table>
+            @if (!isEdit)
+            {
+                <tr>
+                    <td>
+                        <HxSelect 
+                            TItem="RegionLookup"
+                            TValue="int"
+                            Label="Region"
+                            Data="@regions"
+                            @bind-Value="@Wine.Region.Id"
+                            TextSelector="@(p => p.Name)"
+                            ValueSelector="@(p => p.Id)"
+                            Nullable="true"
+                            NullDataText="Loading Regions..."
+                            Enabled="@isEdit"
+                            CssClass="input" />
+                    </td>
+                    <td>
+                        <HxSelect 
+                            TItem="CountryLookup"
+                            TValue="int"
+                            Label="Country"
+                            Data="@countries"
+                            @bind-Value="@Wine.Region.Country.Id"
+                            TextSelector="@(p => p.Name)"
+                            ValueSelector="@(p => p.Id)"
+                            Nullable="true"
+                            NullDataText="Loading Countries..."
+                            Enabled="@isEdit"
+                            CssClass="input" />
+                    </td>
+            </tr>
+            }
+            <tr>
+                <td>
+                    <HxInputNumber LabelType="LabelType.Regular" Label="ABV" @bind-Value="@Wine.Abv" Enabled="@isEdit" CssClass="input">
+                        <InputGroupStartTemplate>
+                            <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Percent" />
+                        </InputGroupStartTemplate>
+                    </HxInputNumber>
+                </td>
+                <td>
+                    <HxInputNumber LabelType="LabelType.Regular" Label="Inventory Level" @bind-Value="@Wine.InventoryLevel" Enabled="@isEdit" CssClass="input">
+                        <InputGroupStartTemplate>
+                            <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Plus" />
+                        </InputGroupStartTemplate>
+                    </HxInputNumber>
+                </td>
+            </tr>
+        </table>
+    </EditForm>
+}
+@code {
+    [Parameter]
+    public DataContract.Wine Wine { get; set; }
+
+    bool isLoading = true;
+    bool isEdit = false;
+    string errorString = string.Empty;
+    IEnumerable<RegionLookup>? regions;
+    IEnumerable<CountryLookup>? countries;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var regionResult = await RegionService.GetLookup().ConfigureAwait(false);
+        if (!regionResult.IsSuccess)
+        {
+            errorString = regionResult.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
+        var countryResult = await CountryService.GetLookup().ConfigureAwait(false);
+        if (!countryResult.IsSuccess)
+        {
+            errorString = countryResult.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
+        regions = regionResult.Data;
+        countries = countryResult.Data;
+        isLoading = false;
+    }
+}
