@@ -153,6 +153,10 @@ a, .btn-link {
     }
 }
 
+.modal-button {
+    margin-right: 5px;
+}
+
 #myMap {
     position: center;
     width: 600px;
