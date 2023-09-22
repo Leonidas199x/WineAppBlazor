@@ -12,6 +12,7 @@ using WineApp.Domain.WineType;
 using WineApp.Domain.Wine;
 using WineApp.Domain.QualityControl;
 using WineApp.Domain.Rating;
+using WineApp.Domain.Issue;
 
 namespace WineApp.Extensions
 {
@@ -32,6 +33,7 @@ namespace WineApp.Extensions
             services.AddTransient<IWineService, WineService>();
             services.AddTransient<IQualityControlService, QualityControlService>();
             services.AddTransient<IRatingService, RatingService>();
+            services.AddTransient<IIssueService, IssueService>();
         }
 
         public static void RegisterUserMappers(this IServiceCollection services) 
