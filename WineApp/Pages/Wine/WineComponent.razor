@@ -19,7 +19,7 @@ else
             RenderMode="TabPanelRenderMode.ActiveTabOnly">
             <HxTab 
                 Id="overview"
-                Title="Overview"
+                Title="Details"
                 TitleTemplate="OverViewFlag"
                 OnTabActivated="SetAverageRating">
                 <Content>
@@ -35,6 +35,28 @@ else
                         <div class="spacer" />
                         <WineDetailComponent Wine="@Wine"/>
                     </div>
+                </Content>
+            </HxTab>
+            <HxTab 
+                Id="grapes"
+                Title="Grapes">
+            </HxTab>
+            <HxTab 
+                Id="ratings"
+                Title="Ratings"
+                TitleTemplate="RatingsFragment">
+                <Content>
+                    <div class="spacer" />
+                    <WineRatingComponent Wine="@Wine" OnSave="UpdateBadges" OnDelete="UpdateBadges"/>
+                </Content>
+            </HxTab>
+            <HxTab 
+                Id="issues"
+                Title="Issues"
+                TitleTemplate="IssuesFragment">
+                <Content>
+                    <div class="spacer" />
+                    <WineIssueComponent Wine="@Wine" OnSave="UpdateBadges" OnDelete="UpdateBadges" />
                 </Content>
             </HxTab>
             <HxTab 
@@ -54,30 +76,12 @@ else
                 </Content>
             </HxTab>
             <HxTab 
-                Id="ratings"
-                Title="Ratings"
-                TitleTemplate="RatingsFragment">
-                <Content>
-                    <div class="spacer" />
-                    <WineRatingComponent Wine="@Wine" OnSave="UpdateBadges" OnDelete="UpdateBadges"/>
-                </Content>
+                Id="orders"
+                Title="Orders">
             </HxTab>
             <HxTab 
                 Id="prices"
                 Title="Prices">
-            </HxTab>
-            <HxTab 
-                Id="issues"
-                Title="Issues"
-                TitleTemplate="IssuesFragment">
-                <Content>
-                    <div class="spacer" />
-                    <WineIssueComponent Wine="@Wine" OnSave="UpdateBadges" OnDelete="UpdateBadges" />
-                </Content>
-            </HxTab>
-            <HxTab 
-                Id="orders"
-                Title="Orders">
             </HxTab>
         </HxTabPanel>
     }
@@ -138,12 +142,18 @@ else
     {
         RatingsFragment = (__builder) =>
         {
-            <HxBadge Color="ThemeColor.Primary">@Wine.Ratings.Count()</HxBadge>
+            if (@Wine.Ratings.Any())
+            {
+                <HxBadge Color="ThemeColor.Primary">@Wine.Ratings.Count()</HxBadge>
+            }
         };
 
         IssuesFragment = (__builder) =>
         {
-            <HxBadge Color="ThemeColor.Primary">@Wine.Issues.Count()</HxBadge>
+            if (@Wine.Issues.Any())
+            {
+                <HxBadge Color="ThemeColor.Primary">@Wine.Issues.Count()</HxBadge>
+            }
         };
     }
 
