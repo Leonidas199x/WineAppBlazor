@@ -137,7 +137,7 @@
     Size="ModalSize.Large"
     Title="@wineName">
     <BodyTemplate>
-       <WineComponent WineId="@wineId"/>
+       <WineComponent WineId="@wineId" CloseModal="Close"/>
     </BodyTemplate>
 </HxModal>
 
@@ -343,5 +343,13 @@
         // editableCountry = new CountryViewModel();
 
         await InvokeAsync(showWine.ShowAsync).ConfigureAwait(false);
+    }
+
+    private async Task Close()
+    {
+        isEdit = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+        await showWine.HideAsync().ConfigureAwait(false);
     }
 }

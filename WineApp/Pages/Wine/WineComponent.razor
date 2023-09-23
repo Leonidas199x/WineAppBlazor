@@ -33,7 +33,7 @@ else
                                 ReadOnly="true" />
                         }
                         <div class="spacer" />
-                        <WineDetailComponent Wine="@Wine"/>
+                        <WineDetailComponent Wine="@Wine" CloseModal="Close"/>
                     </div>
                 </Content>
             </HxTab>
@@ -90,6 +90,9 @@ else
 @code {
     [Parameter]
     public int WineId { get; set; }
+
+    [Parameter]
+    public EventCallback CloseModal { get; set; }
 
     bool isLoading = true;
     string errorString = string.Empty;
@@ -170,5 +173,13 @@ else
         }
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Close()
+    {
+        isEdit = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+        await CloseModal.InvokeAsync().ConfigureAwait(false);
     }
 }
