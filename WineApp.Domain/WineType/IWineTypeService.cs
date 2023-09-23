@@ -10,6 +10,8 @@ namespace WineApp.Domain.WineType
 
         Task<Result<DataContract.WineType>> Get(int id);
 
+        Task<Result<IEnumerable<WineTypeLookup>>> GetLookup();
+
         Task<Result> Put(DataContract.WineType vineywarEstate);
 
         Task<Result> Post(WineTypeCreate vineyardEstate);

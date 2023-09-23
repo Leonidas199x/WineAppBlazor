@@ -22,6 +22,20 @@ namespace WineApp.Domain.QualityControl
                 .ConfigureAwait(false);
         }
 
+        public async Task<Result<IEnumerable<QualityControlLookup>>> GetLookup()
+        {
+            var url = $"{_endpoint}/Lookup";
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            var qualityControllers = await _request
+                .SendAsync<IEnumerable<DataContract.QualityControlLookup>>(request)
+                .ConfigureAwait(false);
+
+            qualityControllers.Data = qualityControllers.Data.ToList();
+
+            return qualityControllers;
+        }
+
         public async Task<Result<PagedList<IEnumerable<DataContract.QualityControl>>>> Search(string name, int page, int pageSize)
         {
             var url = $"{_endpoint}/search?name={name}&page={page}&pageSize={pageSize}";

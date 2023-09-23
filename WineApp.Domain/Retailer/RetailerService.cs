@@ -41,6 +41,20 @@ namespace WineApp.Domain.Retailer
                 .ConfigureAwait(false);
         }
 
+        public async Task<Result<IEnumerable<RetailerLookup>>> GetLookup()
+        {
+            var url = $"{_endpoint}/Lookup";
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            var retailers = await _request
+                .SendAsync<IEnumerable<DataContract.RetailerLookup>>(request)
+                .ConfigureAwait(false);
+
+            retailers.Data = retailers.Data.ToList();
+
+            return retailers;
+        }
+
         public async Task<Result> Put(DataContract.Retailer retailer)
         {
             var json = JsonConvert.SerializeObject(retailer);

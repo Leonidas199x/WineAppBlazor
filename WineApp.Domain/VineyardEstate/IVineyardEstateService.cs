@@ -8,6 +8,8 @@ namespace WineApp.Domain.VineyardEstate
 
         Task<Result<PagedList<IEnumerable<DataContract.VineyardEstate>>>> Search(string name, int page, int pageSize);
 
+        Task<Result<IEnumerable<VineyardEstateLookup>>> GetLookup();
+
         Task<Result<DataContract.VineyardEstate>> Get(int id);
 
         Task<Result> Put(DataContract.VineyardEstate vineywarEstate);

@@ -6,6 +6,8 @@ namespace WineApp.Domain.QualityControl
     {
         Task<Result<PagedList<IEnumerable<DataContract.QualityControl>>>> GetAll(int page, int pageSize);
 
+        Task<Result<IEnumerable<QualityControlLookup>>> GetLookup();
+
         Task<Result<PagedList<IEnumerable<DataContract.QualityControl>>>> Search(string name, int page, int pageSize);
 
         Task<Result<DataContract.QualityControl>> Get(int id);

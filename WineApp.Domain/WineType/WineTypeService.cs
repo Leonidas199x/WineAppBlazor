@@ -32,6 +32,20 @@ namespace WineApp.Domain.WineType
                 .ConfigureAwait(false);
         }
 
+        public async Task<Result<IEnumerable<WineTypeLookup>>> GetLookup()
+        {
+            var url = $"{_endpoint}/Lookup";
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            var wineTypes = await _request
+                .SendAsync<IEnumerable<WineTypeLookup>>(request)
+                .ConfigureAwait(false);
+
+            wineTypes.Data = wineTypes.Data.ToList();
+
+            return wineTypes;
+        }
+
         public async Task<Result<DataContract.WineType>> Get(int id)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"{_endpoint}/{id}");

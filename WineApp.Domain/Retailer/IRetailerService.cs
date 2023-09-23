@@ -6,6 +6,8 @@ namespace WineApp.Domain.Retailer
     {
         Task<Result<PagedList<IEnumerable<DataContract.Retailer>>>> GetAll(int page, int pageSize);
 
+        Task<Result<IEnumerable<RetailerLookup>>> GetLookup();
+
         Task<Result<PagedList<IEnumerable<DataContract.Retailer>>>> Search(string colour, int page, int pageSize);
 
         Task<Result<DataContract.Retailer>> Get(int id);
