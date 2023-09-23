@@ -1,5 +1,10 @@
 ﻿@inject WineApp.Domain.Region.IRegionService RegionService
 @inject WineApp.Domain.Countries.ICountryService CountryService
+@inject WineApp.Domain.Retailer.IRetailerService RetailerService
+@inject WineApp.Domain.QualityControl.IQualityControlService QualityControlService
+@inject WineApp.Domain.VineyardEstate.IVineyardEstateService VineyardEstateService
+@inject WineApp.Domain.WineType.IWineTypeService WineTypeService
+@inject WineApp.Domain.Producer.IProducerService ProducerService
 
 @if (!string.IsNullOrEmpty(errorString))
 {
@@ -15,51 +20,135 @@ else
 {
     <EditForm
         Model="@Wine">
-        <HxInputText LabelType="LabelType.Regular" Label="Name" @bind-Value="@Wine.Description" Enabled="@isEdit" CssClass="input"></HxInputText>
+        <HxInputText 
+            LabelType="LabelType.Regular" 
+            Label="Name" 
+            @bind-Value="@editableWine.Description" 
+            Enabled="@isEdit" 
+            CssClass="input">
+        </HxInputText>
+        <HxInputNumber 
+            LabelType="LabelType.Regular" 
+            Label="Vintage"
+        @bind-Value="@editableWine.Vintage"
+                       Enabled="@isEdit" 
+            CssClass="input">
+        </HxInputNumber>
+        <HxSelect 
+            TItem="WineTypeLookup"
+            TValue="int?"
+            Label="Wine Type"
+            Data="@wineTypes"
+            @bind-Value="@editableWine.WineTypeId"
+            TextSelector="@(p => p.Name)"
+            ValueSelector="@(p => p.Id)"
+            Nullable="true"
+            NullDataText="Loading Wine Types..."
+            Enabled="@isEdit"
+            CssClass="input" />
+        <hr />
         <table>
-            @if (!isEdit)
-            {
-                <tr>
-                    <td>
-                        <HxSelect 
-                            TItem="RegionLookup"
-                            TValue="int"
-                            Label="Region"
-                            Data="@regions"
-                            @bind-Value="@Wine.Region.Id"
-                            TextSelector="@(p => p.Name)"
-                            ValueSelector="@(p => p.Id)"
-                            Nullable="true"
-                            NullDataText="Loading Regions..."
-                            Enabled="@isEdit"
-                            CssClass="input" />
-                    </td>
-                    <td>
-                        <HxSelect 
-                            TItem="CountryLookup"
-                            TValue="int"
-                            Label="Country"
-                            Data="@countries"
-                            @bind-Value="@Wine.Region.Country.Id"
-                            TextSelector="@(p => p.Name)"
-                            ValueSelector="@(p => p.Id)"
-                            Nullable="true"
-                            NullDataText="Loading Countries..."
-                            Enabled="@isEdit"
-                            CssClass="input" />
-                    </td>
-            </tr>
-            }
             <tr>
                 <td>
-                    <HxInputNumber LabelType="LabelType.Regular" Label="ABV" @bind-Value="@Wine.Abv" Enabled="@isEdit" CssClass="input">
+                    <HxSelect 
+                        TItem="RegionLookup"
+                        TValue="int?"
+                        Label="Region"
+                        Data="@regions"
+                        @bind-Value="@editableWine.RegionId"
+                        TextSelector="@(p => p.Name)"
+                        ValueSelector="@(p => p.Id)"
+                        Nullable="true"
+                        NullDataText="Loading Regions..."
+                        Enabled="@isEdit"
+                        CssClass="input" />
+                </td>
+                <td>
+                    <HxSelect 
+                        TItem="CountryLookup"
+                        TValue="int"
+                        Label="Country"
+                        Data="@countries"
+                        @bind-Value="@Wine.Region.Country.Id"
+                        TextSelector="@(p => p.Name)"
+                        ValueSelector="@(p => p.Id)"
+                        Nullable="true"
+                        NullDataText="Loading Countries..."
+                        Enabled="false"
+                        CssClass="input" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <HxSelect 
+                        TItem="ProducerLookup"
+                        TValue="int"
+                        Label="Producer"
+                        Data="@producers"
+                        @bind-Value="@Wine.Producer.Id"
+                        TextSelector="@(p => p.Name)"
+                        ValueSelector="@(p => p.Id)"
+                        Nullable="true"
+                        NullDataText="Loading Producers..."
+                        Enabled="@isEdit"
+                        CssClass="input" />
+                </td>
+                <td>
+                    <HxSelect 
+                        TItem="QualityControlLookup"
+                        TValue="int?"
+                        Label="Quality Control"
+                        Data="@qualityControllers"
+                        @bind-Value="@editableWine.QualityControlId"
+                        TextSelector="@(p => p.Name)"
+                        ValueSelector="@(p => p.Id)"
+                        Nullable="true"
+                        NullDataText="Loading Quality Controllers..."
+                        Enabled="@isEdit"
+                        CssClass="input" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <HxSelect 
+                        TItem="VineyardEstateLookup"
+                        TValue="int?"
+                        Label="Vineyard Estate"
+                        Data="@vineyardEstates"
+                        @bind-Value="@editableWine.VineyardEstateId"
+                        TextSelector="@(p => p.Name)"
+                        ValueSelector="@(p => p.Id)"
+                        Nullable="true"
+                        NullDataText="Loading Vineyard Estates..."
+                              Enabled="@isEdit"
+                        CssClass="input" />
+                </td>
+                <td>
+                    <HxSelect 
+                        TItem="RetailerLookup"
+                        TValue="int?"
+                        Label="Exclusive Retailer"
+                        Data="@retailers"
+                        @bind-Value="@editableWine.ExclusiveRetailerId"
+                        TextSelector="@(p => p.Name)"
+                        ValueSelector="@(p => p.Id)"
+                        Nullable="true"
+                        NullText=""
+                        NullDataText="Loading Retailers..."
+                              Enabled="@isEdit"
+                        CssClass="input" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <HxInputNumber LabelType="LabelType.Regular" Label="ABV" @bind-Value="@editableWine.Abv" Enabled="@isEdit" CssClass="input">
                         <InputGroupStartTemplate>
                             <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Percent" />
                         </InputGroupStartTemplate>
                     </HxInputNumber>
                 </td>
                 <td>
-                    <HxInputNumber LabelType="LabelType.Regular" Label="Inventory Level" @bind-Value="@Wine.InventoryLevel" Enabled="@isEdit" CssClass="input">
+                    <HxInputNumber LabelType="LabelType.Regular" Label="Inventory Level" @bind-Value="@editableWine.InventoryLevel" Enabled="@isEdit" CssClass="input">
                         <InputGroupStartTemplate>
                             <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Plus" />
                         </InputGroupStartTemplate>
@@ -67,20 +156,58 @@ else
                 </td>
             </tr>
         </table>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        @if (!isEdit)
+                        {
+                            <HxButton Text="Edit" Color="ThemeColor.Secondary" CssClass="modal-button" OnClick="Edit" />
+                        }
+                        else
+                        {
+                            <HxSubmit Text="Save" Color="ThemeColor.Primary" CssClass="modal-button" />
+                        }
+                    </td>
+                    <td>
+                        @if (isEdit)
+                        {
+                            <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CancelEdit" />
+                        }
+                        else
+                        {
+                            <HxButton Text="Close" Color="ThemeColor.Danger" OnClick="Close" />
+                        }
+                    </td>
+                </tr>
+            </table>
+        </div>
     </EditForm>
 }
 @code {
     [Parameter]
     public DataContract.Wine Wine { get; set; }
 
+    [Parameter]
+    public EventCallback CloseModal { get; set; }
+
     bool isLoading = true;
     bool isEdit = false;
     string errorString = string.Empty;
+    int? exclusiveRetailerId = null;
     IEnumerable<RegionLookup>? regions;
     IEnumerable<CountryLookup>? countries;
+    IEnumerable<RetailerLookup>? retailers;
+    IEnumerable<QualityControlLookup>? qualityControllers;
+    IEnumerable<VineyardEstateLookup>? vineyardEstates;
+    IEnumerable<WineTypeLookup>? wineTypes;
+    IEnumerable<ProducerLookup>? producers;
+    WineViewModel editableWine;
 
     protected override async Task OnInitializedAsync()
     {
+        editableWine = WineMapper.Map(Wine);
+
         var regionResult = await RegionService.GetLookup().ConfigureAwait(false);
         if (!regionResult.IsSuccess)
         {
@@ -97,8 +224,74 @@ else
             return;
         }
 
+        var retailerResult = await RetailerService.GetLookup().ConfigureAwait(false);
+        if (!retailerResult.IsSuccess)
+        {
+            errorString = retailerResult.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
+        var qualityControllerResult = await QualityControlService.GetLookup().ConfigureAwait(false);
+        if (!qualityControllerResult.IsSuccess)
+        {
+            errorString = qualityControllerResult.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
+        var vineyardEstateResult = await VineyardEstateService.GetLookup().ConfigureAwait(false);
+        if (!vineyardEstateResult.IsSuccess)
+        {
+            errorString = vineyardEstateResult.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
+        var wineTypeResult = await WineTypeService.GetLookup().ConfigureAwait(false);
+        if (!wineTypeResult.IsSuccess)
+        {
+            errorString = wineTypeResult.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
+        var producerResult = await ProducerService.GetLookup().ConfigureAwait(false);
+        if (!producerResult.IsSuccess)
+        {
+            errorString = producerResult.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            return;
+        }
+
         regions = regionResult.Data;
         countries = countryResult.Data;
+        retailers = retailerResult.Data;
+        qualityControllers = qualityControllerResult.Data;
+        vineyardEstates = vineyardEstateResult.Data;
+        wineTypes = wineTypeResult.Data;
+        producers = producerResult.Data;
+
         isLoading = false;
+    }
+
+    private async Task Edit()
+    {
+        isEdit = true;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task CancelEdit()
+    {
+        isEdit = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Close()
+    {
+        isEdit = false;
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+        await CloseModal.InvokeAsync().ConfigureAwait(false);
     }
 }
