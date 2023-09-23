@@ -27,9 +27,10 @@ else
                         <div class="spacer" />
                         @if (Wine.Ratings.Any())
                         {
-                            <MudRating SelectedValue="@averageRating"
-                                       MaxValue="10"
-                                       ReadOnly="true" />
+                            <MudRating 
+                                SelectedValue="@averageRating"
+                                MaxValue="10"
+                                ReadOnly="true" />
                         }
                         <div class="spacer" />
                         <WineDetailComponent Wine="@Wine"/>
