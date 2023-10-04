@@ -31,11 +31,11 @@ namespace WineApp.Mappers
                 Importer = value.Importer,
                 Abv = value.Abv,
                 ProducerId = value.ProducerId,
-                RegionId = value.RegionId,
+                RegionId = value.RegionId.Value,
                 VineyardEstateId = value.VineyardEstateId,
                 Vintage = value.Vintage,
                 QualityControlId = value.QualityControlId,
-                WineTypeId = value.WineTypeId,
+                WineTypeId = value.WineTypeId.Value,
                 InventoryLevel = value.InventoryLevel,
                 ExclusiveToRetailerId = value.ExclusiveRetailerId,
             };
