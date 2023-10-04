@@ -11,17 +11,20 @@
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
-        <HxInputText LabelType="LabelType.Floating"
-                     ValidationMessageMode="ValidationMessageMode.None"
-        @bind-Value="@filterName"
-                     Label="@entity" />
+        <HxInputText 
+            LabelType="LabelType.Floating"
+            ValidationMessageMode="ValidationMessageMode.None"
+            @bind-Value="@filterName"
+            Label="@entity" />
         <hr />
-        <HxButton OnClick="Filter"
-                  Text="Search"
-                  Color="ThemeColor.Secondary" />
-        <HxButton OnClick="ClearFilter"
-                  Text="Clear"
-                  Color="ThemeColor.Secondary" />
+        <HxButton 
+            OnClick="Filter"
+            Text="Search"
+            Color="ThemeColor.Secondary" />
+        <HxButton 
+            OnClick="ClearFilter"
+            Text="Clear"
+            Color="ThemeColor.Secondary" />
     </BodyTemplate>
 </HxOffcanvas>
 
@@ -40,18 +43,21 @@
             PageSize="10"
             Striped="true">
         <Columns>
-            <HxGridColumn HeaderText="@entity"
-                          ItemTextSelector="@(item => item.Name)"
-                          SortString="@nameof(WineType.Name)"
-                          IsDefaultSortColumn="true" />
+            <HxGridColumn 
+                HeaderText="@entity"
+                ItemTextSelector="@(item => item.Name)"
+                SortString="@nameof(WineType.Name)"
+                IsDefaultSortColumn="true" />
             <HxContextMenuGridColumn>
-                <HxButton Icon="BootstrapIcon.Pencil"
-                          Color="ThemeColor.Primary"
-                          OnClick="@(() => ShowEditModal(context))">
+                <HxButton 
+                    Icon="BootstrapIcon.Pencil"
+                    Color="ThemeColor.Primary"
+                    OnClick="@(() => ShowEditModal(context))">
                 </HxButton>
-                <HxButton Icon="BootstrapIcon.Trash"
-                          Color="ThemeColor.Danger"
-                          OnClick="@(() => ShowDeleteModal(context))">
+                <HxButton 
+                    Icon="BootstrapIcon.Trash"
+                    Color="ThemeColor.Secondary"
+                    OnClick="@(() => ShowDeleteModal(context))">
                 </HxButton>
             </HxContextMenuGridColumn>
         </Columns>
