@@ -5,8 +5,8 @@
 <h3><HxIcon Icon="BootstrapIcon.Cup" CssClass="page-icon" />Drinkers</h3>
 
 <HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
-<div class="spacer" />
 <HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+<div class="spacer" />
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
@@ -98,7 +98,7 @@
             <table>
                 <tr>
                     <td>
-                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" CssClass="modal-button" />
                     </td>
                     <td>
                         <HxButton Text="Cancel" Color="ThemeColor.Secondary" OnClick="CloseDeleteModal" />
@@ -125,7 +125,7 @@
                 <table>
                     <tr>
                         <td>
-                            <HxSubmit Text="Save" Color="ThemeColor.Primary" />
+                            <HxSubmit Text="Save" Color="ThemeColor.Primary" CssClass="modal-button" />
                         </td>
                         <td>
                             <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />

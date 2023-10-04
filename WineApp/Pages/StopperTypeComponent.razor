@@ -6,8 +6,8 @@
 <h3><HxIcon Icon="BootstrapIcon.Plug" CssClass="page-icon" />Stopper Types</h3>
 
 <HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
-<div class="spacer" />
 <HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+<div class="spacer" />
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
@@ -111,7 +111,7 @@
             <table>
                 <tr>
                     <td>
-                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" CssClass="modal-button" OnClick="Delete" />
                     </td>
                     <td>
                         <HxButton Text="Cancel" Color="ThemeColor.Secondary" OnClick="CloseDeleteModal" />
@@ -140,7 +140,7 @@
                 <table>
                     <tr>
                         <td>
-                            <HxSubmit Text="Save" Color="ThemeColor.Primary" />
+                            <HxSubmit Text="Save" Color="ThemeColor.Primary" CssClass="modal-button" />
                         </td>
                         <td>
                             <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />

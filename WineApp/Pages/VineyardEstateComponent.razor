@@ -6,8 +6,8 @@
 <h3><HxIcon Icon="BootstrapIcon.Fan" CssClass="page-icon" />Vineyard Estates</h3>
 
 <HxButton Color="ThemeColor.Primary" OnClick="@ShowCreateModal" Icon="@BootstrapIcon.Plus" />
-<div class="spacer" />
 <HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+<div class="spacer" />
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
@@ -100,7 +100,7 @@
             <table>
                 <tr>
                     <td>
-                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" />
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" CssClass="modal-button" OnClick="Delete" />
                     </td>
                     <td>
                         <HxButton Text="Cancel" Color="ThemeColor.Secondary" OnClick="CloseDeleteModal" />
@@ -161,7 +161,8 @@
                                     <td>
                                         <HxSubmit 
                                             Text="Save" 
-                                            Color="ThemeColor.Primary" />
+                                            Color="ThemeColor.Primary"
+                                            CssClass="modal-button"/>
                                     </td>
                                     <td>
                                         <HxButton 
