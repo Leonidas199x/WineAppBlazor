@@ -1,4 +1,4 @@
-﻿@inject WineApp.Domain.VineyardEstate.IVineyardEstateService VineyardEstateService
+﻿@inject WineApp.Domain.IRequestService RequestService
 @inject IVineyardEstateMapper VineyardEstateMapper
 
 @page "/VineyardEstates"
@@ -194,6 +194,8 @@
 @code {
     [Inject] protected IHxMessengerService Messenger { get; set; }
 
+    string endpoint = "VineyardEstate";
+
     bool gridError = false;
     bool editError = false;
     bool deleteError = false;
@@ -225,7 +227,7 @@
                 page = (request.StartIndex / resultsPerPage) + 1;
             }
 
-            var result = await VineyardEstateService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+            var result = await RequestService.GetAll<DataContract.VineyardEstate>(page, resultsPerPage, endpoint).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 errorString = result.Error;
@@ -264,7 +266,7 @@
                 page = (request.StartIndex / resultsPerPage) + 1;
             }
 
-            var result = await VineyardEstateService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+            var result = await RequestService.Search<DataContract.VineyardEstate>(filterName, page, resultsPerPage, endpoint).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 errorString = result.Error;
@@ -299,7 +301,7 @@
             await SetEdit(true).ConfigureAwait(false);
             await ClearEditError().ConfigureAwait(false);
 
-            var result = await VineyardEstateService.Get(value.Id).ConfigureAwait(false);
+            var result = await RequestService.Get<DataContract.VineyardEstate>(value.Id, endpoint).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 editError = true;
@@ -357,16 +359,16 @@
 
     private async Task<Result> SaveEdit()
     {
-        var colour = VineyardEstateMapper.Map(editableVineyardEstate);
+        var vineyardEstate = VineyardEstateMapper.Map(editableVineyardEstate);
 
-        return await VineyardEstateService.Put(colour).ConfigureAwait(false);
+        return await RequestService.Put<DataContract.VineyardEstate>(vineyardEstate, endpoint).ConfigureAwait(false);
     }
 
     private async Task<Result> SaveNew()
     {
-        var region = VineyardEstateMapper.MapNew(editableVineyardEstate);
+        var vineyardEstate = VineyardEstateMapper.MapNew(editableVineyardEstate);
 
-        return await VineyardEstateService.Post(region).ConfigureAwait(false);
+        return await RequestService.Post<DataContract.VineyardEstateCreate>(vineyardEstate, endpoint).ConfigureAwait(false);
     }
 
     private async Task ShowCreateModal()
@@ -431,7 +433,7 @@
     {
         try
         {
-            var result = await VineyardEstateService.Delete(deletevineyardId).ConfigureAwait(false);
+            var result = await RequestService.Delete(deletevineyardId, endpoint).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 errorString = $"There was an error deleting the record. The error is: {result.Error}";
