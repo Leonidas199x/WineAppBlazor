@@ -16,10 +16,10 @@ namespace WineApp.Mappers
                 InventoryLevel = value.InventoryLevel,
                 ExclusiveRetailerId = value.ExclusiveRetailer?.Id,
                 ProducerId = value.Producer?.Id,
-                RegionId = value.Region?.Id,
+                RegionId = value.Region.Id,
                 QualityControlId = value.QualityControl?.Id,
                 VineyardEstateId = value.VineyardEstate?.Id,
-                WineTypeId = value.WineType?.Id,
+                WineTypeId = value.WineType.Id,
             };
         }
 
