@@ -12,17 +12,17 @@ namespace WineApp.ViewModels
         public int? ProducerId { get; set; }
 
         [Required]
-        public int RegionId { get; set; }
+        public int? RegionId { get; set; }
 
         [Range(1900, 2100, ErrorMessage = "Vintage must be between 1900 & 2100")]
-        public int Vintage { get; set; }
+        public int? Vintage { get; set; }
 
         public int? QualityControlId { get; set; }
 
         public int? VineyardEstateId { get; set; }
 
         [Required]
-        public int WineTypeId { get; set; }
+        public int? WineTypeId { get; set; }
 
         [Required]
         public decimal Abv { get; set; }
