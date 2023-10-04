@@ -8,6 +8,8 @@ namespace WineApp.Domain.Wine
 
         Task<Result<DataContract.Wine>> Get(int id);
 
+        Task<Result> Post(WineCreate wine);
+
         Task<Result<PagedList<IEnumerable<WineHeader>>>> Search(string name, int page, int pageSize);
 
         Task<Result> Delete(int id);

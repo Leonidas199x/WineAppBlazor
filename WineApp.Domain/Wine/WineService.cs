@@ -1,4 +1,5 @@
 ﻿using DataContract;
+using Newtonsoft.Json;
 
 namespace WineApp.Domain.Wine
 {
@@ -38,6 +39,15 @@ namespace WineApp.Domain.Wine
             return await _request
                 .SendAsync<PagedList<IEnumerable<WineHeader>>>(request)
                 .ConfigureAwait(false);
+        }
+
+        public async Task<Result> Post(WineCreate wine)
+        {
+            var json = JsonConvert.SerializeObject(wine);
+
+            return await _request
+                    .PostAsync(_endpoint, json)
+                    .ConfigureAwait(false);
         }
 
         public async Task<Result> Delete(int id)
