@@ -10,10 +10,11 @@
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
-        <HxInputText LabelType="LabelType.Floating"
-                     ValidationMessageMode="ValidationMessageMode.None"
-        @bind-Value="@filterName"
-                     Label="Vineyard Estate" />
+        <HxInputText 
+            LabelType="LabelType.Floating"
+            ValidationMessageMode="ValidationMessageMode.None"
+            @bind-Value="@filterName"
+            Label="Vineyard Estate" />
         <hr />
         <HxButton OnClick="Filter"
                   Text="Search"
