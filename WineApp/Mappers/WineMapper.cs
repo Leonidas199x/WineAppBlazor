@@ -22,5 +22,23 @@ namespace WineApp.Mappers
                 WineTypeId = value.WineType?.Id,
             };
         }
+
+        public static DataContract.WineCreate Map(WineViewModel value)
+        {
+            return new DataContract.WineCreate
+            {
+                Description = value.Description,
+                Importer = value.Importer,
+                Abv = value.Abv,
+                ProducerId = value.ProducerId,
+                RegionId = value.RegionId,
+                VineyardEstateId = value.VineyardEstateId,
+                Vintage = value.Vintage,
+                QualityControlId = value.QualityControlId,
+                WineTypeId = value.WineTypeId,
+                InventoryLevel = value.InventoryLevel,
+                ExclusiveToRetailerId = value.ExclusiveRetailerId,
+            };
+        }
     }
 }
