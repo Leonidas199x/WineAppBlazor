@@ -72,23 +72,9 @@ namespace WineApp.Domain.Region
             var url = $"{_endpoint}/Lookup";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-            var regions = await _request
-                .SendAsync<IEnumerable<RegionLookup>>(request)
-                .ConfigureAwait(false);
-
-            var zeroRegion = new RegionLookup
-            {
-                Id = 0,
-                Name = string.Empty,
-            };
-
-            var list = regions.Data.ToList();
-
-            list.Add(zeroRegion);
-
-            regions.Data = list;
-
-            return regions;
+            return await _request
+                            .SendAsync<IEnumerable<RegionLookup>>(request)
+                            .ConfigureAwait(false);
         }
     }
 }
