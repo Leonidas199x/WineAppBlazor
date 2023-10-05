@@ -10,6 +10,8 @@ namespace WineApp.Domain
 
         Task<Result<T>> Get<T>(int id, string endpoint);
 
+        Task<Result<IEnumerable<T>>> GetByWineId<T>(string endpoint, int wineId);
+
         Task<Result<IEnumerable<T>>> GetLookup<T>(string endpoint);
 
         Task<Result> Put<T>(T value, string endpoint);

@@ -84,5 +84,15 @@ namespace WineApp.Domain
                 .SendAsync<PagedList<IEnumerable<T>>>(request)
                 .ConfigureAwait(false);
         }
+
+        public async Task<Result<IEnumerable<T>>> GetByWineId<T>(string endpoint, int wineId)
+        {
+            var url = $"{endpoint}/WineId/{wineId}";
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            return await _request
+                            .SendAsync<IEnumerable<T>>(request)
+                            .ConfigureAwait(false);
+        }
     }
 }
