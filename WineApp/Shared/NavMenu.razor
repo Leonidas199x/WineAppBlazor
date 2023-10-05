@@ -1,29 +1,26 @@
-﻿<HxSidebar>
-    <HeaderTemplate>
-        <HxSidebarBrand BrandName="Wine App" BrandNameShort="WA">
-            <LogoTemplate>
-                <img src="/images/wine/redwine.png" width="35" height="35" />
-            </LogoTemplate>
-        </HxSidebarBrand>
-    </HeaderTemplate>
-    <ItemsTemplate>
-        <HxSidebarItem Text="Home" Href="/" Icon="BootstrapIcon.House" />
-        <HxSidebarItem Text="Orders" Href="/Orders" Icon="BootstrapIcon.Paperclip" />
-        <HxSidebarItem Text="Wines" Href="/Wines" Icon="BootstrapIcon.CupStraw" />
-        <HxSidebarItem Text="Admin" Icon="BootstrapIcon.Wrench">
-            <HxSidebarItem Text="Countries" Href="/Countries" Match="NavLinkMatch.All" Icon="BootstrapIcon.Globe" />
-            <HxSidebarItem Text="Drinkers" Href="/Drinkers" Match="NavLinkMatch.All" Icon="BootstrapIcon.Cup" />
-            <HxSidebarItem Text="Grapes" Href="/Grapes" Match="NavLinkMatch.All" Icon="BootstrapIcon.Tree" />
-            <HxSidebarItem Text="Grape Colours" Href="/GrapeColours" Icon="BootstrapIcon.Palette" />
-            <HxSidebarItem Text="Quality Controllers" Href="/QualityControllers" Icon="BootstrapIcon.CreditCard" />
-            <HxSidebarItem Text="Regions" Href="/Regions" Icon="BootstrapIcon.MapFill" />
-            <HxSidebarItem Text="Retailers" Href="/Retailers" Icon="BootstrapIcon.Shop" />
-            <HxSidebarItem Text="Stopper Types" Href="/StopperTypes" Icon="BootstrapIcon.Plug" />
-            <HxSidebarItem Text="Vineyard Estates" Href="/VineyardEstates" Icon="BootstrapIcon.Fan" />
-            <HxSidebarItem Text="Wine Types" Href="/WineTypes" Icon="BootstrapIcon.Braces" />
-        </HxSidebarItem>
-    </ItemsTemplate>
-</HxSidebar>
+﻿<MudPaper>
+    <MudNavMenu>
+        <MudText><img src="/images/wine/redwine.png" width="35" height="35" /></MudText>
+        <MudText>Wine Database</MudText>
+        <MudDivider Class="my-2" />
+        <MudNavLink Href="/">Home</MudNavLink>
+        <MudNavLink Href="/Orders">Orders</MudNavLink>
+        <MudNavLink Href="/Wines">Wines</MudNavLink>
+        <MudNavGroup Title="Admin" Expanded="true">
+            <MudNavLink Href="/Countries">Countries</MudNavLink>
+            <MudNavLink Href="/Drinkers">Drinkers</MudNavLink>
+            <MudNavLink Href="/Grapes">Grapes</MudNavLink>
+            <MudNavLink Href="/GrapeColours">Grape Colours</MudNavLink>
+            <MudNavLink Href="/QualityControllers">Quality Controllers</MudNavLink>
+            <MudNavLink Href="/Regions">Regions</MudNavLink>
+            <MudNavLink Href="/Retailers">Retailers</MudNavLink>
+            <MudNavLink Href="/StopperTypes">Stopper Types</MudNavLink>
+            <MudNavLink Href="/VineyardEstates">Vineyard Estates</MudNavLink>
+            <MudNavLink Href="/WineTypes">Wine Types</MudNavLink>
+        </MudNavGroup>
+        <MudNavLink Href="/about">About</MudNavLink>
+    </MudNavMenu>
+</MudPaper>
 
 @code {
 
