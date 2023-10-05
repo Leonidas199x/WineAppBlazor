@@ -18,6 +18,8 @@ namespace WineApp.Domain
 
         Task<Result> Post<T>(T value, string endpoint);
 
+        Task<Result<T>> Post<T, X>(X value, string endpoint);
+
         Task<Result> Delete(int id, string endpoint);
     }
 }

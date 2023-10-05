@@ -62,6 +62,17 @@ namespace WineApp.Domain
                     .ConfigureAwait(false);
         }
 
+        public async Task<Result<T>> Post<T, X>(X value, string endpoint)
+        {
+            var json = JsonConvert.SerializeObject(value);
+            
+            var result = await _request
+                .PostAsync<T>(endpoint, json)
+                .ConfigureAwait(false);
+
+            return result;
+        }
+
         public async Task<Result> Put<T>(T value, string endpoint)
         {
             var json = JsonConvert.SerializeObject(value);
