@@ -1,0 +1,293 @@
+﻿@inject WineApp.Domain.IRequestService RequestService
+
+@if (!string.IsNullOrEmpty(errorString))
+{
+    <HxAlert Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger">@errorString</HxAlert>
+}
+<EditForm
+    Model="@editableWine"
+    OnValidSubmit=@Save>
+    <DataAnnotationsValidator />
+    <HxInputText 
+        LabelType="LabelType.Regular" 
+        Label="Name" 
+        @bind-Value="@editableWine.Description" 
+        CssClass="input"
+        ValidationMessageMode="ValidationMessageMode.None" />
+     <table>
+         <tr>
+             <td>
+                <HxInputText 
+                    LabelType="LabelType.Regular"
+                    Label="Importer"
+                    @bind-Value="@editableWine.Importer"
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.None" />
+             </td>
+             <td>
+                 <HxInputNumber 
+                    LabelType="LabelType.Regular"
+                    Label="Vintage" 
+                    @bind-Value="@editableWine.Vintage"
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.Regular">
+                    <InputGroupStartTemplate>
+                        <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Airplane" />
+                    </InputGroupStartTemplate>
+                </HxInputNumber>
+            </td>
+         </tr>
+         <tr>
+             <td>
+                <HxSelect 
+                    TItem="WineTypeLookup"
+                    TValue="int?"
+                    Label="Wine Type"
+                    Data="@wineTypes"
+                    @bind-Value="@editableWine.WineTypeId"
+                    TextSelector="@(p => p.Name)"
+                    ValueSelector="@(p => p.Id)"
+                    Nullable="true"
+                    NullDataText="Loading Wine Types..."
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.None" />
+             </td>
+             <td>
+                <HxSelect 
+                    TItem="RegionLookup"
+                    TValue="int?"
+                    Label="Region"
+                    Data="@regions"
+                    @bind-Value="@editableWine.RegionId"
+                    TextSelector="@(p => p.Name)"
+                    ValueSelector="@(p => p.Id)"
+                    Nullable="true"
+                    NullDataText="Loading Regions..."
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.None" />
+             </td>
+         </tr>
+         <tr>
+             <td>
+                 <HxSelect 
+                    TItem="ProducerLookup"
+                    TValue="int?"
+                    Label="Producer"
+                    Data="@producers"
+                    @bind-Value="@editableWine.ProducerId"
+                    TextSelector="@(p => p.Name)"
+                    ValueSelector="@(p => p.Id)"
+                    Nullable="true"
+                    NullDataText="Loading Producers..."
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.None" />
+             </td>
+             <td>
+                 <HxSelect 
+                    TItem="QualityControlLookup"
+                    TValue="int?"
+                    Label="Quality Control"
+                    Data="@qualityControllers"
+                    @bind-Value="@editableWine.QualityControlId"
+                    TextSelector="@(p => p.Name)"
+                    ValueSelector="@(p => p.Id)"
+                    Nullable="true"
+                    NullDataText="Loading Quality Controllers..."
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.None" />
+             </td>
+         </tr>
+         <tr>
+             <td>
+                <HxSelect 
+                    TItem="VineyardEstateLookup"
+                    TValue="int?"
+                    Label="Vineyard Estate"
+                    Data="@vineyardEstates"
+                    @bind-Value="@editableWine.VineyardEstateId"
+                    TextSelector="@(p => p.Name)"
+                    ValueSelector="@(p => p.Id)"
+                    Nullable="true"
+                    NullDataText="Loading Vineyard Estates..."
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.None" />
+             </td>
+             <td>
+                <HxSelect 
+                    TItem="RetailerLookup"
+                    TValue="int?"
+                    Label="Exclusive Retailer"
+                    Data="@retailers"
+                    @bind-Value="@editableWine.ExclusiveRetailerId"
+                    TextSelector="@(p => p.Name)"
+                    ValueSelector="@(p => p.Id)"
+                    Nullable="true"
+                    NullText=""
+                    NullDataText="Loading Retailers..."
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.None" />
+             </td>
+         </tr>
+         <tr>
+             <td>
+                <HxInputNumber 
+                    LabelType="LabelType.Regular"
+                    Label="ABV" @bind-Value="@editableWine.Abv"
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.None">
+                    <InputGroupStartTemplate>
+                        <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Percent" />
+                    </InputGroupStartTemplate>
+                </HxInputNumber>
+             </td>
+             <td>
+                <HxInputNumber 
+                    LabelType="LabelType.Regular"
+                    Label="Inventory Level"
+                    @bind-Value="@editableWine.InventoryLevel"
+                    CssClass="input"
+                    ValidationMessageMode="ValidationMessageMode.None">
+                    <InputGroupStartTemplate>
+                        <HxIcon CssClass="input-group-text" Icon="BootstrapIcon.Plus" />
+                    </InputGroupStartTemplate>
+                </HxInputNumber>
+             </td>
+         </tr>
+     </table>
+    <div class="modal-footer">
+        <table>
+            <tr>
+                <td>
+                    <HxSubmit Text="Save" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Primary" CssClass="modal-button" />
+                </td>
+                <td>
+                    <HxButton Text="Close" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger" OnClick="Close" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public EventCallback<int?> CloseModal { get; set; }
+
+    string endpoint = "Wine";
+    WineViewModel editableWine = new WineViewModel();
+    string errorString = string.Empty;
+    IEnumerable<WineTypeLookup>? wineTypes;
+    IEnumerable<RegionLookup>? regions;
+    IEnumerable<ProducerLookup>? producers;
+    IEnumerable<QualityControlLookup>? qualityControllers;
+    IEnumerable<VineyardEstateLookup>? vineyardEstates;
+    IEnumerable<RetailerLookup>? retailers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetWineTypes().ConfigureAwait(false);
+        await GetRegions().ConfigureAwait(false);
+        await GetProducers().ConfigureAwait(false);
+        await GetQualityControllers().ConfigureAwait(false);
+        await GetVineyardEstates().ConfigureAwait(false);
+        await GetRetailers().ConfigureAwait(false);
+    }
+
+    private async Task Save()
+    {
+        var wine = WineMapper.Map(editableWine);
+        var result = await RequestService.Post<WineCreated, WineCreate>(wine, endpoint);
+        if (!result.IsSuccess)
+        {
+            errorString = result.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        await CloseModal.InvokeAsync(result.Data.WineId);
+    }
+
+    private async Task Close()
+    {
+        await InvokeAsync(StateHasChanged);
+
+        await CloseModal.InvokeAsync();
+    }
+
+    private async Task GetWineTypes()
+    {
+        var wineTypeResult = await RequestService.GetLookup<DataContract.WineTypeLookup>("WineType");
+        if (!wineTypeResult.IsSuccess)
+        {
+            errorString = wineTypeResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        wineTypes = wineTypeResult.Data;
+    }
+
+    private async Task GetRegions()
+    {
+        var regionResult = await RequestService.GetLookup<DataContract.RegionLookup>("Region");
+        if (!regionResult.IsSuccess)
+        {
+            errorString = regionResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        regions = regionResult.Data;
+    }
+
+    private async Task GetProducers()
+    {
+        var producerResult = await RequestService.GetLookup<DataContract.ProducerLookup>("Producer");
+        if (!producerResult.IsSuccess)
+        {
+            errorString = producerResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        producers = producerResult.Data;
+    }
+
+    private async Task GetQualityControllers()
+    {
+        var qualityControllerResult = await RequestService.GetLookup<DataContract.QualityControlLookup>("QualityControl");
+        if (!qualityControllerResult.IsSuccess)
+        {
+            errorString = qualityControllerResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        qualityControllers = qualityControllerResult.Data;
+    }
+
+    private async Task GetVineyardEstates()
+    {
+        var vineyardEstateResult = await RequestService.GetLookup<DataContract.VineyardEstateLookup>("VineyardEstate");
+        if (!vineyardEstateResult.IsSuccess)
+        {
+            errorString = vineyardEstateResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        vineyardEstates = vineyardEstateResult.Data;
+    }
+
+    private async Task GetRetailers()
+    {
+        var retailerResult = await RequestService.GetLookup<DataContract.RetailerLookup>("Retailer");
+        if (!retailerResult.IsSuccess)
+        {
+            errorString = retailerResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        retailers = retailerResult.Data;
+    }
+}
