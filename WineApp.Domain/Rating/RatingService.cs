@@ -22,31 +22,5 @@ namespace WineApp.Domain.Rating
                             .SendAsync<IEnumerable<WineRating>>(request)
                             .ConfigureAwait(false);
         }
-
-        public async Task<Result> Put(WineRating rating)
-        {
-            var json = JsonConvert.SerializeObject(rating);
-            return await _request
-                    .PutAsync(_endpoint, json)
-                    .ConfigureAwait(false);
-        }
-
-        public async Task<Result> Post(WineRating rating)
-        {
-            var json = JsonConvert.SerializeObject(rating);
-
-            return await _request
-                    .PostAsync(_endpoint, json)
-                    .ConfigureAwait(false);
-        }
-
-        public async Task<Result> Delete(int id)
-        {
-            var url = $"{_endpoint}/{id}";
-
-            return await _request
-                        .DeleteAsync(url)
-                        .ConfigureAwait(false);
-        }
     }
 }

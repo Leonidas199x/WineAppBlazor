@@ -22,31 +22,5 @@ namespace WineApp.Domain.Issue
                             .SendAsync<IEnumerable<DataContract.Issue>>(request)
                             .ConfigureAwait(false);
         }
-
-        public async Task<Result> Put(DataContract.Issue issue)
-        {
-            var json = JsonConvert.SerializeObject(issue);
-            return await _request
-                    .PutAsync(_endpoint, json)
-                    .ConfigureAwait(false);
-        }
-
-        public async Task<Result> Post(DataContract.Issue issue)
-        {
-            var json = JsonConvert.SerializeObject(issue);
-
-            return await _request
-                    .PostAsync(_endpoint, json)
-                    .ConfigureAwait(false);
-        }
-
-        public async Task<Result> Delete(int id)
-        {
-            var url = $"{_endpoint}/{id}";
-
-            return await _request
-                        .DeleteAsync(url)
-                        .ConfigureAwait(false);
-        }
     }
 }

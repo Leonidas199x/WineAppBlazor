@@ -70,9 +70,14 @@ namespace WineApp.Domain
                     .ConfigureAwait(false);
         }
 
-        public async Task<Result<PagedList<IEnumerable<T>>>> Search<T>(string name, int page, int pageSize, string endpoint)
+        public async Task<Result<PagedList<IEnumerable<T>>>> Search<T>(Dictionary<string, string> searchParams, int page, int pageSize, string endpoint)
         {
-            var url = $"{endpoint}/search?name={name}&page={page}&pageSize={pageSize}";
+            var url = $"{endpoint}/search?page={page}&pageSize={pageSize}";
+
+            foreach (var param in searchParams)
+            {
+                url = $"{url}&{param.Key}={param.Value}";
+            }
             var request = new HttpRequestMessage(HttpMethod.Get, url);
 
             return await _request

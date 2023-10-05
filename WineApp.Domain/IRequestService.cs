@@ -6,7 +6,7 @@ namespace WineApp.Domain
     {
         Task<Result<PagedList<IEnumerable<T>>>> GetAll<T>(int page, int pageSize, string endpoint);
 
-        Task<Result<PagedList<IEnumerable<T>>>> Search<T>(string name, int page, int pageSize, string endpoint);
+        Task<Result<PagedList<IEnumerable<T>>>> Search<T>(Dictionary<string, string> searchParams, int page, int pageSize, string endpoint);
 
         Task<Result<T>> Get<T>(int id, string endpoint);
 
