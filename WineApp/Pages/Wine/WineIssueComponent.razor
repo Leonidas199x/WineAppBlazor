@@ -1,4 +1,4 @@
-﻿@inject WineApp.Domain.Issue.IIssueService IssueService
+﻿@inject WineApp.Domain.IRequestService RequestService
 
 <HxButton Color="ThemeColor.Primary" OnClick="Create" Icon="@BootstrapIcon.Plus" />
 <div class="spacer" />
@@ -92,6 +92,7 @@ else if (isDelete)
     [Parameter]
     public EventCallback OnDelete { get; set; }
 
+    string endpoint = "Issue";
     private HxGrid<Issue> issueGrid = new HxGrid<Issue>();
     int resultsPerPage = 10;
     int TotalPages = 0;
@@ -175,7 +176,7 @@ else if (isDelete)
             return;
         }
 
-        var deleteResult = await IssueService.Delete(deleteId.Value).ConfigureAwait(false);
+        var deleteResult = await RequestService.Delete(deleteId.Value, endpoint).ConfigureAwait(false);
         if (!deleteResult.IsSuccess)
         {
             errorMessage = deleteResult.Error;
@@ -216,8 +217,8 @@ else if (isDelete)
         var issue = IssueMapper.Map(issueViewModel);
 
         var result = (isEdit)
-                        ? await IssueService.Put(issue).ConfigureAwait(false)
-                        : await IssueService.Post(issue).ConfigureAwait(false);
+                        ? await RequestService.Put(issue, endpoint).ConfigureAwait(false)
+                        : await RequestService.Post(issue, endpoint).ConfigureAwait(false);
 
         if (!result.IsSuccess)
         {
@@ -232,7 +233,7 @@ else if (isDelete)
 
     private async Task RefreshIssues()
     {
-        var issueResult = await IssueService.GetByWineId(Wine.Id).ConfigureAwait(false);
+        var issueResult = await RequestService.GetByWineId<Issue>(endpoint, Wine.Id).ConfigureAwait(false);
         if (!issueResult.IsSuccess)
         {
             saveError = issueResult.Error;

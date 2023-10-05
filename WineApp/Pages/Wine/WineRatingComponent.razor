@@ -1,4 +1,4 @@
-﻿@inject WineApp.Domain.Rating.IRatingService RatingService
+﻿@inject WineApp.Domain.IRequestService RequestService
 
 <HxButton Color="ThemeColor.Primary" OnClick="Create" Icon="@BootstrapIcon.Plus" />
 <div class="spacer" />
@@ -90,6 +90,7 @@ else if (isDelete)
     [Parameter]
     public EventCallback OnDelete { get; set; }
 
+    string endpoint = "Rating";
     private HxGrid<WineRating> ratingsGrid = new HxGrid<WineRating>();
     private HxModal addEditRating = new HxModal();
     int resultsPerPage = 10;
@@ -178,7 +179,7 @@ else if (isDelete)
             return;
         }
 
-        var deleteResult = await RatingService.Delete(deleteId.Value).ConfigureAwait(false);
+        var deleteResult = await RequestService.Delete(deleteId.Value, endpoint).ConfigureAwait(false);
         if (!deleteResult.IsSuccess)
         {
             return;
@@ -215,8 +216,8 @@ else if (isDelete)
         var rating = RatingMapper.Map(ratingViewModel);
 
         var result = (isEdit)
-                        ? await RatingService.Put(rating).ConfigureAwait(false)
-                        : await RatingService.Post(rating).ConfigureAwait(false);
+                        ? await RequestService.Put(rating, endpoint).ConfigureAwait(false)
+                        : await RequestService.Post(rating, endpoint).ConfigureAwait(false);
 
         if (!result.IsSuccess)
         {
@@ -231,7 +232,7 @@ else if (isDelete)
 
     private async Task RefreshRatings()
     {
-        var ratingResult = await RatingService.GetByWineId(Wine.Id).ConfigureAwait(false);
+        var ratingResult = await RequestService.GetByWineId<WineRating>(endpoint, Wine.Id).ConfigureAwait(false);
         if (!ratingResult.IsSuccess)
         {
             saveError = ratingResult.Error;
