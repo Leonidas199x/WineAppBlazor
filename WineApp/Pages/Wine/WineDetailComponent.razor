@@ -1,14 +1,8 @@
-﻿@inject WineApp.Domain.Region.IRegionService RegionService
-@inject WineApp.Domain.Countries.ICountryService CountryService
-@inject WineApp.Domain.Retailer.IRetailerService RetailerService
-@inject WineApp.Domain.QualityControl.IQualityControlService QualityControlService
-@inject WineApp.Domain.VineyardEstate.IVineyardEstateService VineyardEstateService
-@inject WineApp.Domain.WineType.IWineTypeService WineTypeService
-@inject WineApp.Domain.Producer.IProducerService ProducerService
+﻿@inject WineApp.Domain.IRequestService RequestService
 
 @if (!string.IsNullOrEmpty(errorString))
 {
-    <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+    <HxAlert Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger">@errorString</HxAlert>
 }
 @if (isLoading)
 {
@@ -135,7 +129,7 @@ else
                         Nullable="true"
                         NullText=""
                         NullDataText="Loading Retailers..."
-                              Enabled="@isEdit"
+                        Enabled="@isEdit"
                         CssClass="input" />
                 </td>
             </tr>
@@ -162,21 +156,21 @@ else
                     <td>
                         @if (!isEdit)
                         {
-                            <HxButton Text="Edit" Color="ThemeColor.Secondary" CssClass="modal-button" OnClick="Edit" />
+                            <HxButton Text="Edit" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Secondary" CssClass="modal-button" OnClick="Edit" />
                         }
                         else
                         {
-                            <HxSubmit Text="Save" Color="ThemeColor.Primary" CssClass="modal-button" />
+                            <HxSubmit Text="Save" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Primary" CssClass="modal-button" />
                         }
                     </td>
                     <td>
                         @if (isEdit)
                         {
-                            <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CancelEdit" />
+                            <HxButton Text="Cancel" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger" OnClick="CancelEdit" />
                         }
                         else
                         {
-                            <HxButton Text="Close" Color="ThemeColor.Danger" OnClick="Close" />
+                            <HxButton Text="Close" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger" OnClick="Close" />
                         }
                     </td>
                 </tr>
@@ -208,7 +202,7 @@ else
     {
         editableWine = WineMapper.Map(Wine);
 
-        var regionResult = await RegionService.GetLookup().ConfigureAwait(false);
+        var regionResult = await RequestService.GetLookup<DataContract.RegionLookup>("Region").ConfigureAwait(false);
         if (!regionResult.IsSuccess)
         {
             errorString = regionResult.Error;
@@ -216,7 +210,7 @@ else
             return;
         }
 
-        var countryResult = await CountryService.GetLookup().ConfigureAwait(false);
+        var countryResult = await RequestService.GetLookup<DataContract.CountryLookup>("Country").ConfigureAwait(false);
         if (!countryResult.IsSuccess)
         {
             errorString = countryResult.Error;
@@ -224,7 +218,7 @@ else
             return;
         }
 
-        var retailerResult = await RetailerService.GetLookup().ConfigureAwait(false);
+        var retailerResult = await RequestService.GetLookup<DataContract.RetailerLookup>("Retailer").ConfigureAwait(false);
         if (!retailerResult.IsSuccess)
         {
             errorString = retailerResult.Error;
@@ -232,7 +226,7 @@ else
             return;
         }
 
-        var qualityControllerResult = await QualityControlService.GetLookup().ConfigureAwait(false);
+        var qualityControllerResult = await RequestService.GetLookup<QualityControlLookup>("QualityControl").ConfigureAwait(false);
         if (!qualityControllerResult.IsSuccess)
         {
             errorString = qualityControllerResult.Error;
@@ -240,7 +234,7 @@ else
             return;
         }
 
-        var vineyardEstateResult = await VineyardEstateService.GetLookup().ConfigureAwait(false);
+        var vineyardEstateResult = await RequestService.GetLookup<DataContract.VineyardEstateLookup>("VineyardEstate").ConfigureAwait(false);
         if (!vineyardEstateResult.IsSuccess)
         {
             errorString = vineyardEstateResult.Error;
@@ -248,7 +242,7 @@ else
             return;
         }
 
-        var wineTypeResult = await WineTypeService.GetLookup().ConfigureAwait(false);
+        var wineTypeResult = await RequestService.GetLookup<DataContract.WineTypeLookup>("WineType").ConfigureAwait(false);
         if (!wineTypeResult.IsSuccess)
         {
             errorString = wineTypeResult.Error;
@@ -256,7 +250,7 @@ else
             return;
         }
 
-        var producerResult = await ProducerService.GetLookup().ConfigureAwait(false);
+        var producerResult = await RequestService.GetLookup<DataContract.ProducerLookup>("Producer").ConfigureAwait(false);
         if (!producerResult.IsSuccess)
         {
             errorString = producerResult.Error;
