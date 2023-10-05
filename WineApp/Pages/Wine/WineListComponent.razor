@@ -4,9 +4,9 @@
 
 <h3><HxIcon Icon="BootstrapIcon.CupStraw" CssClass="page-icon" />Wines</h3>
 
-<HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
+<HxButton Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
 <div class="spacer" />
-<HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+<HxButton CssClass="admin-filter" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
@@ -19,18 +19,18 @@
         <HxButton 
             OnClick="Filter"
             Text="Search"
-            Color="ThemeColor.Secondary"/>
+            Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Secondary"/>
         <HxButton 
             OnClick="ClearFilter"
             Text="Clear"
-            Color="ThemeColor.Secondary"/>
+            Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Secondary"/>
     </BodyTemplate>
 </HxOffcanvas>
 
 @if (gridError)
 {
     <div class="spacer" />
-    <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
+    <HxAlert Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
 }
 
 @if (!isSearch)
@@ -56,12 +56,12 @@
             <HxContextMenuGridColumn>
                 <HxButton 
                     Icon="BootstrapIcon.Eye"
-                    Color="ThemeColor.Primary"
+                    Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Primary"
                     OnClick="@(() => ShowViewModal(context))">
                 </HxButton>
                 <HxButton 
                     Icon="BootstrapIcon.Trash"
-                    Color="ThemeColor.Secondary"
+                    Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Secondary"
                     OnClick="@(() => ShowDeleteModal(context))">
                 </HxButton>
             </HxContextMenuGridColumn>
@@ -87,12 +87,12 @@
             <HxContextMenuGridColumn>
                 <HxButton 
                     Icon="BootstrapIcon.Eye"
-                    Color="ThemeColor.Primary"
+                    Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Primary"
                     OnClick="@(() => ShowViewModal(context))">
                 </HxButton>
                 <HxButton 
                     Icon="BootstrapIcon.Trash"
-                    Color="ThemeColor.Secondary"
+                    Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Secondary"
                     OnClick="@(() => ShowDeleteModal(context))">
                 </HxButton>
             </HxContextMenuGridColumn>
@@ -107,7 +107,7 @@
     <BodyTemplate>
         @if (deleteError)
         {
-            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+            <HxAlert Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger">@errorString</HxAlert>
         }
         <p>Are you sure you wish to delete the @entity '@deleteName'?</p>
         <p>This action cannot be undone.</p>
@@ -117,13 +117,13 @@
                     <td>
                         <HxButton 
                             Text="Delete" 
-                            Color="ThemeColor.Danger" 
+                            Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger" 
                             OnClick="Delete" />
                     </td>
                     <td>
                         <HxButton 
                             Text="Cancel"
-                            Color="ThemeColor.Secondary"
+                            Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Secondary"
                             OnClick="CloseDeleteModal" />
                     </td>
                 </tr>
@@ -137,7 +137,15 @@
     Size="ModalSize.Large"
     Title="@wineName">
     <BodyTemplate>
-       <WineComponent WineId="@wineId" CloseModal="Close"/>
+       <WineComponent WineId="@WineId" CloseModal="Close"/>
+    </BodyTemplate>
+</HxModal>
+<HxModal 
+    @ref="createWine"
+    Size="ModalSize.Large"
+    Title="Add New Wine">
+    <BodyTemplate>
+       <WineCreateComponent CloseModal="CloseCreate"/>
     </BodyTemplate>
 </HxModal>
 
@@ -154,6 +162,7 @@
     int resultsPerPage = 10;
     string errorString = string.Empty;
     private HxModal showWine = new HxModal();
+    private HxModal createWine = new HxModal();
     private HxModal deleteWine = new HxModal();
     private HxOffcanvas filter;
     EditContext editContext;
@@ -163,7 +172,7 @@
     string deleteName = string.Empty;
     int deleteId;
     string entity = "Wine";
-    int wineId;
+    int WineId;
     string wineName = string.Empty;
 
     private async Task<GridDataProviderResult<WineHeader>> GetGridData(GridDataProviderRequest<WineHeader> request)
@@ -176,12 +185,12 @@
                 page = (request.StartIndex / resultsPerPage) + 1;
             }
 
-            var result = await WineService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+            var result = await WineService.GetAll(page, resultsPerPage);
             if (!result.IsSuccess)
             {
                 errorString = result.Error;
                 gridError = true;
-                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await InvokeAsync(StateHasChanged);
                 return new GridDataProviderResult<WineHeader>();
             }
 
@@ -196,7 +205,7 @@
         catch (Exception)
         {
             gridError = true;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged);
 
             return new GridDataProviderResult<WineHeader>();
         }
@@ -207,19 +216,19 @@
         try
         {
             isSearch = true;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged);
             var page = 1;
             if (request.StartIndex > 0)
             {
                 page = (request.StartIndex / resultsPerPage) + 1;
             }
 
-            var result = await WineService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+            var result = await WineService.Search(filterName, page, resultsPerPage);
             if (!result.IsSuccess)
             {
                 errorString = result.Error;
                 gridError = true;
-                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await InvokeAsync(StateHasChanged);
                 return new GridDataProviderResult<WineHeader>();
             }
 
@@ -234,7 +243,7 @@
         catch (Exception)
         {
             gridError = true;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged);
 
             return new GridDataProviderResult<WineHeader>();
         }
@@ -246,13 +255,13 @@
         try
         {
             wineName = value.Description;
-            wineId = value.Id;
-            await InvokeAsync(showWine.ShowAsync).ConfigureAwait(false);
+            WineId = value.Id;
+            await InvokeAsync(showWine.ShowAsync);
         }
         catch (Exception)
         {
             editError = true;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -261,16 +270,16 @@
         deleteId = value.Id;
         deleteName = value.Description;
 
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-        await InvokeAsync(deleteWine.ShowAsync).ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(deleteWine.ShowAsync);
     }
 
     private async Task CloseDeleteModal()
     {
         deleteError = false;
         errorString = string.Empty;
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-        await deleteWine.HideAsync().ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged);
+        await deleteWine.HideAsync();
     }
 
     private async Task FilterOpen()
@@ -281,8 +290,8 @@
     private async Task Filter()
     {
         isSearch = true;
-        await searchGrid.RefreshDataAsync().ConfigureAwait(false);
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await searchGrid.RefreshDataAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task ClearFilter()
@@ -290,19 +299,19 @@
         isSearch = false;
         filterName = string.Empty;
 
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task Delete()
     {
         try
         {
-            var result = await WineService.Delete(deleteId).ConfigureAwait(false);
+            var result = await WineService.Delete(deleteId);
             if (!result.IsSuccess)
             {
                 errorString = $"There was an error deleting the record. The error is: {result.Error}";
                 deleteError = true;
-                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await InvokeAsync(StateHasChanged);
                 return;
             }
 
@@ -311,15 +320,15 @@
             deleteId = default;
             deleteName = string.Empty;
 
-            await RefreshGrid(isSearch).ConfigureAwait(false);
+            await RefreshGrid(isSearch);
 
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-            await CloseDeleteModal().ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged);
+            await CloseDeleteModal();
         }
         catch (Exception)
         {
             errorString = $"There was an error deleting the {entity}";
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -327,29 +336,35 @@
     {
         if (isSearch)
         {
-            await InvokeAsync(searchGrid.RefreshDataAsync).ConfigureAwait(false);
+            await InvokeAsync(searchGrid.RefreshDataAsync);
 
             return;
         }
 
-        await InvokeAsync(dataGrid.RefreshDataAsync).ConfigureAwait(false);
+        await InvokeAsync(dataGrid.RefreshDataAsync);
     }
 
     private async Task ShowCreateModal()
     {
-        // modalText = "Add New Country";
-        // await SetEdit(false).ConfigureAwait(false);
-        // await ClearEditError().ConfigureAwait(false);
-        // editableCountry = new CountryViewModel();
-
-        await InvokeAsync(showWine.ShowAsync).ConfigureAwait(false);
+        await InvokeAsync(createWine.ShowAsync);
     }
 
     private async Task Close()
     {
         isEdit = false;
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged);
 
-        await showWine.HideAsync().ConfigureAwait(false);
+        await showWine.HideAsync();
+    }
+
+    private async Task CloseCreate(int? wineId)
+    {
+        await InvokeAsync(createWine.HideAsync);
+
+        if (wineId != null)
+        {
+            WineId = wineId.Value;
+            await InvokeAsync(showWine.ShowAsync);
+        }
     }
 }
