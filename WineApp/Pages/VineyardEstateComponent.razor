@@ -266,7 +266,10 @@
                 page = (request.StartIndex / resultsPerPage) + 1;
             }
 
-            var result = await RequestService.Search<DataContract.VineyardEstate>(filterName, page, resultsPerPage, endpoint).ConfigureAwait(false);
+            var searchParams = new Dictionary<string, string>();
+            searchParams.Add("name", filterName);
+
+            var result = await RequestService.Search<DataContract.VineyardEstate>(searchParams, page, resultsPerPage, endpoint).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 errorString = result.Error;

@@ -1,4 +1,4 @@
-﻿@inject WineApp.Domain.WineType.IWineTypeService WineTypeService
+﻿@inject WineApp.Domain.IRequestService RequestService
 @inject IWineTypeMapper WineTypeMapper
 
 @page "/WineTypes"
@@ -152,6 +152,7 @@
 @code {
     [Inject] protected IHxMessengerService Messenger { get; set; }
 
+    string endpoint = "WineType";
     bool gridError = false;
     bool editError = false;
     bool deleteError = false;
@@ -184,7 +185,7 @@
                 page = (request.StartIndex / resultsPerPage) + 1;
             }
 
-            var result = await WineTypeService.GetAll(page, resultsPerPage).ConfigureAwait(false);
+            var result = await RequestService.GetAll<DataContract.WineType>(page, resultsPerPage, endpoint).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 errorString = result.Error;
@@ -223,7 +224,10 @@
                 page = (request.StartIndex / resultsPerPage) + 1;
             }
 
-            var result = await WineTypeService.Search(filterName, page, resultsPerPage).ConfigureAwait(false);
+            var searchParams = new Dictionary<string, string>();
+            searchParams.Add("name", filterName);
+
+            var result = await RequestService.Search<DataContract.WineType>(searchParams, page, resultsPerPage, endpoint).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 errorString = result.Error;
@@ -258,7 +262,7 @@
             await SetEdit(true).ConfigureAwait(false);
             await ClearEditError().ConfigureAwait(false);
 
-            var result = await WineTypeService.Get(value.Id).ConfigureAwait(false);
+            var result = await RequestService.Get<DataContract.WineType>(value.Id, endpoint).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 editError = true;
@@ -316,16 +320,16 @@
 
     private async Task<Result> SaveEdit()
     {
-        var colour = WineTypeMapper.Map(editableWineType);
+        var wineType = WineTypeMapper.Map(editableWineType);
 
-        return await WineTypeService.Put(colour).ConfigureAwait(false);
+        return await RequestService.Put(wineType, endpoint).ConfigureAwait(false);
     }
 
     private async Task<Result> SaveNew()
     {
         var wineType = WineTypeMapper.MapNew(editableWineType);
 
-        return await WineTypeService.Post(wineType).ConfigureAwait(false);
+        return await RequestService.Post(wineType, endpoint).ConfigureAwait(false);
     }
 
     private async Task ShowCreateModal()
@@ -390,7 +394,7 @@
     {
         try
         {
-            var result = await WineTypeService.Delete(deleteId).ConfigureAwait(false);
+            var result = await RequestService.Delete(deleteId, endpoint).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 errorString = $"There was an error deleting the record. The error is: {result.Error}";

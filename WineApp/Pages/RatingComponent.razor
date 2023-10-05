@@ -1,4 +1,4 @@
-﻿@inject WineApp.Domain.Drinker.IDrinkerService DrinkerService
+﻿@inject WineApp.Domain.IRequestService RequestService
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -60,7 +60,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await DrinkerService.GetLookup().ConfigureAwait(false);
+        var result = await RequestService.GetLookup<DataContract.Drinker>("Drinker").ConfigureAwait(false);
         if (!result.IsSuccess)
         {
             errorMessage = result.Error;
