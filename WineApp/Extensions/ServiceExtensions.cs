@@ -2,8 +2,6 @@
 using WineApp.Mappers;
 using WineApp.Domain.Maps;
 using WineApp.Domain.Wine;
-using WineApp.Domain.Rating;
-using WineApp.Domain.Issue;
 
 namespace WineApp.Extensions
 {
@@ -15,8 +13,6 @@ namespace WineApp.Extensions
             services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
             services.AddTransient<IRequestService, RequestService>();
             services.AddTransient<IWineService, WineService>();
-            services.AddTransient<IRatingService, RatingService>();
-            services.AddTransient<IIssueService, IssueService>();
         }
 
         public static void RegisterUserMappers(this IServiceCollection services) 
