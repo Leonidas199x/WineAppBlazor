@@ -41,6 +41,22 @@ namespace WineApp.Domain
             return await HttpResponseHandler.HandleError(response).ConfigureAwait(false);
         }
 
+        public async Task<Result<T>> PostAsync<T>(string url, string body)
+        {
+            var (client, request) = CreateClientRequest(url, body, HttpMethod.Post);
+
+            var response = await client.SendAsync(request).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                return await HttpResponseHandler.HandleError<T>(response).ConfigureAwait(false);
+            }
+
+            var json = response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<T>(json.Result);
+
+            return new Result<T>(data, response.IsSuccessStatusCode);
+        }
+
         public async Task<Result> PutAsync(string url, string body)
         {
             var (client, request) = CreateClientRequest(url, body, HttpMethod.Put);

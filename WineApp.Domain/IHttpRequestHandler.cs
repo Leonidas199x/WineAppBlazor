@@ -6,6 +6,8 @@
 
         Task<Result> PostAsync(string url, string body);
 
+        Task<Result<T>> PostAsync<T>(string url, string body);
+
         Task<Result> PutAsync(string url, string body);
 
         Task<Result> DeleteAsync(string url);
