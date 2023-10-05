@@ -1,19 +1,9 @@
-﻿using WineApp.Domain.Countries;
-using WineApp.Domain.Drinker;
-using WineApp.Domain.GrapeColour;
-using WineApp.Domain.StopperType;
-using WineApp.Domain;
+﻿using WineApp.Domain;
 using WineApp.Mappers;
-using WineApp.Domain.Retailer;
-using WineApp.Domain.Region;
 using WineApp.Domain.Maps;
-using WineApp.Domain.VineyardEstate;
-using WineApp.Domain.WineType;
 using WineApp.Domain.Wine;
-using WineApp.Domain.QualityControl;
 using WineApp.Domain.Rating;
 using WineApp.Domain.Issue;
-using WineApp.Domain.Producer;
 
 namespace WineApp.Extensions
 {
@@ -21,21 +11,12 @@ namespace WineApp.Extensions
     {
         public static void RegisterUserSevices(this IServiceCollection services, string apiKey) 
         {
-            services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
-            services.AddTransient<ICountryService, CountryService>();
-            services.AddTransient<IGrapeColourService, GrapeColourService>();
-            services.AddTransient<IStopperTypeService, StopperTypeService>();
-            services.AddTransient<IDrinkerService, DrinkerService>();
-            services.AddTransient<IRetailerService, RetailerService>();
-            services.AddTransient<IRegionService, RegionService>();
             services.AddTransient<IMapsService>(x => new MapsService(apiKey, x.GetRequiredService<IHttpRequestHandler>()));
-            services.AddTransient<IVineyardEstateService, VineyardEstateService>();
-            services.AddTransient<IWineTypeService, WineTypeService>();
+            services.AddTransient<IHttpRequestHandler, HttpRequestHandler>();
+            services.AddTransient<IRequestService, RequestService>();
             services.AddTransient<IWineService, WineService>();
-            services.AddTransient<IQualityControlService, QualityControlService>();
             services.AddTransient<IRatingService, RatingService>();
             services.AddTransient<IIssueService, IssueService>();
-            services.AddTransient<IProducerService, ProducerService>();
         }
 
         public static void RegisterUserMappers(this IServiceCollection services) 
