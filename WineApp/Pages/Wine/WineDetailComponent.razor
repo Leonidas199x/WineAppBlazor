@@ -2,7 +2,7 @@
 
 @if (!string.IsNullOrEmpty(errorString))
 {
-    <HxAlert Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger">@errorString</HxAlert>
+    <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
 }
 @if (isLoading)
 {
@@ -160,7 +160,7 @@ else
                         }
                         else
                         {
-                            <HxSubmit Text="Save" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Primary" CssClass="modal-button" />
+                            <HxSubmit Text="Save" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Primary" CssClass="modal-button" OnClick="Save"/>
                         }
                     </td>
                     <td>
@@ -185,6 +185,10 @@ else
     [Parameter]
     public EventCallback CloseModal { get; set; }
 
+    [Parameter]
+    public EventCallback<Wine> AfterSave {get; set; }
+
+    string endpoint = "Wine";
     bool isLoading = true;
     bool isEdit = false;
     string errorString = string.Empty;
@@ -202,90 +206,152 @@ else
     {
         editableWine = WineMapper.Map(Wine);
 
-        var regionResult = await RequestService.GetLookup<DataContract.RegionLookup>("Region").ConfigureAwait(false);
-        if (!regionResult.IsSuccess)
-        {
-            errorString = regionResult.Error;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-            return;
-        }
-
-        var countryResult = await RequestService.GetLookup<DataContract.CountryLookup>("Country").ConfigureAwait(false);
-        if (!countryResult.IsSuccess)
-        {
-            errorString = countryResult.Error;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-            return;
-        }
-
-        var retailerResult = await RequestService.GetLookup<DataContract.RetailerLookup>("Retailer").ConfigureAwait(false);
-        if (!retailerResult.IsSuccess)
-        {
-            errorString = retailerResult.Error;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-            return;
-        }
-
-        var qualityControllerResult = await RequestService.GetLookup<QualityControlLookup>("QualityControl").ConfigureAwait(false);
-        if (!qualityControllerResult.IsSuccess)
-        {
-            errorString = qualityControllerResult.Error;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-            return;
-        }
-
-        var vineyardEstateResult = await RequestService.GetLookup<DataContract.VineyardEstateLookup>("VineyardEstate").ConfigureAwait(false);
-        if (!vineyardEstateResult.IsSuccess)
-        {
-            errorString = vineyardEstateResult.Error;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-            return;
-        }
-
-        var wineTypeResult = await RequestService.GetLookup<DataContract.WineTypeLookup>("WineType").ConfigureAwait(false);
-        if (!wineTypeResult.IsSuccess)
-        {
-            errorString = wineTypeResult.Error;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-            return;
-        }
-
-        var producerResult = await RequestService.GetLookup<DataContract.ProducerLookup>("Producer").ConfigureAwait(false);
-        if (!producerResult.IsSuccess)
-        {
-            errorString = producerResult.Error;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
-            return;
-        }
-
-        regions = regionResult.Data;
-        countries = countryResult.Data;
-        retailers = retailerResult.Data;
-        qualityControllers = qualityControllerResult.Data;
-        vineyardEstates = vineyardEstateResult.Data;
-        wineTypes = wineTypeResult.Data;
-        producers = producerResult.Data;
+        await GetWineTypes();
+        await GetRegions();
+        await GetProducers();
+        await GetQualityControllers();
+        await GetVineyardEstates();
+        await GetRetailers();
+        await GetCountries();
 
         isLoading = false;
+    }
+
+    private async Task Save()
+    {
+        var wine = WineMapper.MapUpdate(editableWine);
+        var result = await RequestService.Put<WineCreate>(wine, endpoint);
+        if (!result.IsSuccess)
+        {
+            errorString = result.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        var updatedWine = await RequestService.Get<Wine>(Wine.Id, endpoint);
+        if (!updatedWine.IsSuccess)
+        {
+            errorString = $"The updated was saved, but could not be reloaded: {updatedWine.Error}";
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        isEdit = false;
+        Wine = updatedWine.Data;
+        editableWine = WineMapper.Map(Wine);
+        await InvokeAsync(StateHasChanged);
+
+        await AfterSave.InvokeAsync(Wine);
     }
 
     private async Task Edit()
     {
         isEdit = true;
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task CancelEdit()
     {
         isEdit = false;
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task Close()
     {
         isEdit = false;
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged);
 
-        await CloseModal.InvokeAsync().ConfigureAwait(false);
+        await CloseModal.InvokeAsync();
+    }
+
+    private async Task GetWineTypes()
+    {
+        var wineTypeResult = await RequestService.GetLookup<DataContract.WineTypeLookup>("WineType");
+        if (!wineTypeResult.IsSuccess)
+        {
+            errorString = wineTypeResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        wineTypes = wineTypeResult.Data;
+    }
+
+    private async Task GetRegions()
+    {
+        var regionResult = await RequestService.GetLookup<DataContract.RegionLookup>("Region");
+        if (!regionResult.IsSuccess)
+        {
+            errorString = regionResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        regions = regionResult.Data;
+    }
+
+    private async Task GetProducers()
+    {
+        var producerResult = await RequestService.GetLookup<DataContract.ProducerLookup>("Producer");
+        if (!producerResult.IsSuccess)
+        {
+            errorString = producerResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        producers = producerResult.Data;
+    }
+
+    private async Task GetQualityControllers()
+    {
+        var qualityControllerResult = await RequestService.GetLookup<DataContract.QualityControlLookup>("QualityControl");
+        if (!qualityControllerResult.IsSuccess)
+        {
+            errorString = qualityControllerResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        qualityControllers = qualityControllerResult.Data;
+    }
+
+    private async Task GetVineyardEstates()
+    {
+        var vineyardEstateResult = await RequestService.GetLookup<DataContract.VineyardEstateLookup>("VineyardEstate");
+        if (!vineyardEstateResult.IsSuccess)
+        {
+            errorString = vineyardEstateResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        vineyardEstates = vineyardEstateResult.Data;
+    }
+
+    private async Task GetRetailers()
+    {
+        var retailerResult = await RequestService.GetLookup<DataContract.RetailerLookup>("Retailer");
+        if (!retailerResult.IsSuccess)
+        {
+            errorString = retailerResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        retailers = retailerResult.Data;
+    }
+
+    private async Task GetCountries()
+    {
+        var countryResult = await RequestService.GetLookup<DataContract.CountryLookup>("Country");
+        if (!countryResult.IsSuccess)
+        {
+            errorString = countryResult.Error;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        countries = countryResult.Data;
     }
 }

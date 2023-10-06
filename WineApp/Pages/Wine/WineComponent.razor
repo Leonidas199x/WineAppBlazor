@@ -33,7 +33,7 @@ else
                                 ReadOnly="true" />
                         }
                         <div class="spacer" />
-                        <WineDetailComponent Wine="@Wine" CloseModal="Close"/>
+                        <WineDetailComponent Wine="@Wine" CloseModal="Close" AfterSave="UpdateWine"/>
                     </div>
                 </Content>
             </HxTab>
@@ -65,13 +65,24 @@ else
                 <Content>
                     <div class="fade-in">
                         <div class="spacer" />
-                        <p>@Wine.Description is from the @Wine.Region.Name region of @Wine.Region.Country.Name</p>
-                        <p>Below is a map, which shows the location of the vineyard '@Wine.VineyardEstate.Name' where @Wine.Description is produced by @Wine.Producer.Name.</p>
-                        <MapComponent 
-                            Latitude="@Wine.VineyardEstate.Latitude" 
-                            Longitude="@Wine.VineyardEstate.Longitude" 
-                            Location="@Wine.VineyardEstate.Name"
+                        <p>@Wine.Description is from the @Wine.Region.Name region of @Wine.Region.Country.Name.</p>
+                        @if (Wine.VineyardEstate != null)
+                        {
+                            @if (Wine.Producer != null)
+                            {
+                                <p>where @Wine.Description is produced by @Wine.Producer.Name.</p>
+                            }
+                            <p>Below is a map, which shows the location of the vineyard '@Wine.VineyardEstate.Name'</p>
+                            <MapComponent 
+                                Latitude="@Wine.VineyardEstate.Latitude"
+                                Longitude="@Wine.VineyardEstate.Longitude"
+                                Location="@Wine.VineyardEstate.Name"
                             GetCoordinates=false />
+                        }
+                        else
+                        {
+                            <p><b><i>Add a vineyard estate to see a map of where the wine is from.</i></b></p>
+                        }
                     </div>
                 </Content>
             </HxTab>
@@ -108,16 +119,16 @@ else
     {
         try
         {
-            var result = await WineService.Get(WineId).ConfigureAwait(false);
+            var result = await WineService.Get(WineId);
             if (!result.IsSuccess)
             {
                 errorString = result.Error;
-                await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+                await InvokeAsync(StateHasChanged);
                 return;
             }
 
             Wine = result.Data;
-            await SetAverageRating().ConfigureAwait(false);
+            await SetAverageRating();
 
             var flagString = $"{NavigationManager.BaseUri}/images/flags/{Wine.Region.Country.IsoCode.ToLower()}.svg";
             flagLocation = new Uri(flagString);
@@ -131,12 +142,12 @@ else
                 <img class="flag-view" src="@flagLocation" />
             };
 
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged);
         }
         catch
         {
             errorString = UserTextResponses.ErrorMessage;
-            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+            await InvokeAsync(StateHasChanged);
             return;
         }
     }
@@ -172,14 +183,20 @@ else
             averageRating = (ratingTotal / count);
         }
 
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task Close()
     {
         isEdit = false;
-        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        await InvokeAsync(StateHasChanged);
 
-        await CloseModal.InvokeAsync().ConfigureAwait(false);
+        await CloseModal.InvokeAsync();
+    }
+
+    private async Task UpdateWine(Wine wine)
+    {
+        Wine = wine;
+        await InvokeAsync(StateHasChanged);
     }
 }
