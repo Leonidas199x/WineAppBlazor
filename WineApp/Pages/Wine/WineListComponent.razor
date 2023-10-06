@@ -118,7 +118,8 @@
                         <HxButton 
                             Text="Delete" 
                             Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger" 
-                            OnClick="Delete" />
+                            OnClick="Delete" 
+                            CssClass="modal-button"/>
                     </td>
                     <td>
                         <HxButton 
@@ -366,5 +367,8 @@
             WineId = wineId.Value;
             await InvokeAsync(showWine.ShowAsync);
         }
+
+        await InvokeAsync(dataGrid.RefreshDataAsync);
+        await InvokeAsync(StateHasChanged);
     }
 }
