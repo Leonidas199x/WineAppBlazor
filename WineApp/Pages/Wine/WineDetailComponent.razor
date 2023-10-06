@@ -156,21 +156,21 @@ else
                     <td>
                         @if (!isEdit)
                         {
-                            <HxButton Text="Edit" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Secondary" CssClass="modal-button" OnClick="Edit" />
+                            <HxButton Text="Edit" Color="ThemeColor.Secondary" CssClass="modal-button" OnClick="Edit" />
                         }
                         else
                         {
-                            <HxSubmit Text="Save" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Primary" CssClass="modal-button" OnClick="Save"/>
+                            <HxSubmit Text="Save" Color="ThemeColor.Primary" CssClass="modal-button" OnClick="Save"/>
                         }
                     </td>
                     <td>
                         @if (isEdit)
                         {
-                            <HxButton Text="Cancel" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger" OnClick="CancelEdit" />
+                            <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CancelEdit" />
                         }
                         else
                         {
-                            <HxButton Text="Close" Color="Havit.Blazor.Components.Web.Bootstrap.ThemeColor.Danger" OnClick="Close" />
+                            <HxButton Text="Close" Color="ThemeColor.Danger" OnClick="Close" />
                         }
                     </td>
                 </tr>
