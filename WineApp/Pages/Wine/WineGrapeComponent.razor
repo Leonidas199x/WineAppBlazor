@@ -1,0 +1,238 @@
+﻿@inject WineApp.Domain.IRequestService RequestService
+
+<HxButton Color="ThemeColor.Primary" OnClick="Create" Icon="@BootstrapIcon.Plus" />
+<div class="spacer" />
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <HxAlert Color="ThemeColor.Danger">@errorMessage</HxAlert>
+}
+
+@if (!isEdit && !isCreate && !isDelete)
+{
+    <div class="fade-in">
+        <HxGrid @ref="grapesGrid"
+                TItem="WineGrape"
+                Responsive="true"
+                DataProvider="GetGrapes"
+                PageSize="10"
+                Striped="true">
+            <Columns>
+                <HxGridColumn HeaderText="Grape"
+                              ItemTextSelector="@(item => item.GrapeName)"/>
+                <HxContextMenuGridColumn>
+                    <HxButton Icon="BootstrapIcon.Eye"
+                              Color="ThemeColor.Primary"
+                              OnClick="@(() => View(context))">
+                    </HxButton>
+                    <HxButton Icon="BootstrapIcon.Pencil"
+                              Color="ThemeColor.Primary"
+                              OnClick="@(() => Edit(context))">
+                    </HxButton>
+                    <HxButton Icon="BootstrapIcon.Trash"
+                              Color="ThemeColor.Secondary"
+                              OnClick="@(() => Delete(context))">
+                    </HxButton>
+                </HxContextMenuGridColumn>
+            </Columns>
+        </HxGrid>
+    </div>
+}
+else if (isEdit || isCreate)
+{
+    <div class="fade-in">
+        @if (!string.IsNullOrWhiteSpace(saveError))
+        {
+            <HxAlert Color="ThemeColor.Danger">@saveError</HxAlert>
+        }
+
+        <GrapeWineBridgeComponent WineGrapeViewModel="@wineGrapeViewModel" OnCancel="Cancel" OnSave="Save" />
+    </div>
+}
+else if (isDelete)
+{
+    <div class="fade-in">
+        <p>Are you sure you wish to delete the grape '@grapeName'</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton Text="Delete"
+                                  Color="ThemeColor.Danger"
+                                  OnClick="DeleteWineGrape"
+                                  CssClass="modal-button" />
+                    </td>
+                    <td>
+                        <HxButton Text="Cancel"
+                                  Color="ThemeColor.Secondary"
+                                  OnClick="Cancel" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Wine Wine { get; set; }
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
+    string endpoint = "Grape";
+    private HxGrid<WineGrape> grapesGrid = new HxGrid<WineGrape>();
+    IEnumerable<WineGrape> grapes;
+    int resultsPerPage = 100;
+    int TotalPages = 0;
+    bool isLoading = true;
+    bool gridError = false;
+    bool isEdit = false;
+    bool isCreate = false;
+    bool isDelete = false;
+    string errorMessage = string.Empty;
+    string saveError = string.Empty;
+    WineGrapeViewModel wineGrapeViewModel;
+    int? grapeWineId;
+    string grapeName;
+
+    private async Task<GridDataProviderResult<WineGrape>> GetGrapes(GridDataProviderRequest<WineGrape> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            TotalPages = Wine.Grapes.Count() / resultsPerPage;
+
+            return new GridDataProviderResult<WineGrape>
+                {
+                    Data = Wine.Grapes,
+                    TotalCount = Wine.Grapes.Count(),
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+
+            return new GridDataProviderResult<WineGrape>();
+        }
+    }
+
+    private async Task Create()
+    {
+        isEdit = false;
+        isCreate = true;
+        isDelete = false;
+
+        wineGrapeViewModel = new WineGrapeViewModel
+        {
+            WineId = Wine.Id,
+        };
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Edit(WineGrape wineGrape)
+    {
+        isEdit = true;
+        isCreate = false;
+        isDelete = false;
+
+        wineGrapeViewModel = WineMapper.Map(wineGrape);
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Delete(WineGrape grape)
+    {
+        isEdit = false;
+        isCreate = false;
+        isDelete = true;
+
+        grapeWineId = grape.Id;
+        grapeName = grape.GrapeName;
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task View(WineGrape grape)
+    {
+        
+    }
+
+    private async Task Save()
+    {
+        var wineGrape = WineGrapeMapper.Map(wineGrapeViewModel);
+
+        var result = (isEdit)
+                        ? await RequestService.Put(wineGrape, endpoint).ConfigureAwait(false)
+                        : await RequestService.Post(wineGrape, endpoint).ConfigureAwait(false);
+
+        if (!result.IsSuccess)
+        {
+            saveError = result.Error;
+            return;
+        }
+
+        await RefreshWineGrapes().ConfigureAwait(false);
+
+        await InvokeAsync(OnSave.InvokeAsync).ConfigureAwait(false);
+    }
+
+    private async Task DeleteWineGrape()
+    {
+        if (grapeWineId == null)
+        {
+            return;
+        }
+
+        var deleteResult = await RequestService.Delete(grapeWineId.Value, endpoint).ConfigureAwait(false);
+        if (!deleteResult.IsSuccess)
+        {
+            return;
+        }
+
+        await RefreshWineGrapes().ConfigureAwait(false);
+
+        await InvokeAsync(OnDelete.InvokeAsync).ConfigureAwait(false);
+    }
+
+    private async Task RefreshWineGrapes()
+    {
+        var result = await RequestService.GetByWineId<WineGrape>(endpoint, Wine.Id).ConfigureAwait(false);
+        if (!result.IsSuccess)
+        {
+            saveError = result.Error;
+            return;
+        }
+
+        Wine.Grapes = result.Data;
+
+        await InvokeAsync(grapesGrid.RefreshDataAsync).ConfigureAwait(false);
+
+        Reset();
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private async Task Cancel()
+    {
+        Reset();
+
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
+    private void Reset()
+    {
+        isEdit = false;
+        isCreate = false;
+        isDelete = false;
+    }
+}
