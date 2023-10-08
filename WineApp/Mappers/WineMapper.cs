@@ -59,5 +59,15 @@ namespace WineApp.Mappers
                 ExclusiveToRetailerId = value.ExclusiveRetailerId,
             };
         }
+
+        public static WineGrapeViewModel Map(DataContract.WineGrape value)
+        {
+            return new WineGrapeViewModel
+            {
+                Id = value.Id,
+                GrapeId = value.GrapeId,
+                WineId = value.WineId,
+            };
+        }
     }
 }
