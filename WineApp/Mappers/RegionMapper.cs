@@ -5,13 +5,6 @@ namespace WineApp.Mappers
 {
     public class RegionMapper : IRegionMapper
     {
-        private ICountryMapper _countryMapper;
-
-        public RegionMapper(ICountryMapper countryMapper)
-        {
-            _countryMapper = countryMapper;
-        }
-
         public Region Map(RegionViewModel value)
         {
             return new Region
@@ -24,7 +17,7 @@ namespace WineApp.Mappers
                 Latitude = value.Latitude,
                 DateCreated = value.DateCreated,
                 DateUpdated = value.DateUpdated,
-                Country = _countryMapper.Map(value.Country),
+                Country = new Country { Id = value.CountryId.Value },
             };
         }
 
@@ -40,7 +33,7 @@ namespace WineApp.Mappers
                 Latitude = value.Latitude,
                 DateCreated = value.DateCreated,
                 DateUpdated = value.DateUpdated,
-                Country = _countryMapper.Map(value.Country),
+                CountryId = value.Country.Id,
             };
         }
 
@@ -53,7 +46,7 @@ namespace WineApp.Mappers
                 Note = value.Note,
                 Longitude = value.Longitude,
                 Latitude = value.Latitude,
-                CountryId = value.Country.Id.Value,
+                CountryId = value.CountryId.Value,
             };
         }
     }
