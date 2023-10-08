@@ -105,7 +105,7 @@
         {
             <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
         }
-        <p>Are you sure you wish to delete the grape colour '@deleteColour'?</p>
+        <p>Are you sure you wish to delete the grape colour '@deleteGrapeColour'?</p>
         <p>This action cannot be undone.</p>
         <div class="modal-footer">
             <table>
@@ -283,6 +283,8 @@
 
     private async void ShowDeleteModal(GrapeColour value)
     {
+        errorString = string.Empty;
+        deleteColourId = value.Id;
         deleteGrapeColour = value.Colour;
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
