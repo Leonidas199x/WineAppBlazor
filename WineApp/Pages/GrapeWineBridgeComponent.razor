@@ -1,0 +1,81 @@
+﻿@inject WineApp.Domain.IRequestService RequestService
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <HxAlert Color="ThemeColor.Danger">@errorMessage</HxAlert>
+}
+
+<EditForm 
+    Model="@WineGrapeViewModel"
+    OnValidSubmit=@Save>
+    <DataAnnotationsValidator />
+    <HxSelect 
+        TItem="GrapeLookup"
+        TValue="int?"
+        Label="Grape"
+        Data="@grapes"
+        @bind-Value="@grapeId"
+        TextSelector="@(p => p.Name)"
+        ValueSelector="@(p => p.Id)"
+        Nullable="true"
+        NullDataText="Loading Grapes..." />
+    <div class="modal-footer">
+        <table>
+            <tr>
+                <td>
+                    <HxSubmit 
+                        Text="Save"
+                        Color="ThemeColor.Primary"
+                        CssClass="modal-button" />
+                </td>
+                <td>
+                    <HxButton 
+                        Text="Cancel"
+                        Color="ThemeColor.Danger"
+                        OnClick="Cancel" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public WineGrapeViewModel WineGrapeViewModel { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    IEnumerable<GrapeLookup> grapes;
+    string errorMessage = string.Empty;
+    int? grapeId = null;
+    string grapeEndpoint = "Grape";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await RequestService.GetLookup<DataContract.GrapeLookup>(grapeEndpoint).ConfigureAwait(false);
+        if (!result.IsSuccess)
+        {
+            errorMessage = result.Error;
+            await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+        }
+
+        grapeId = WineGrapeViewModel.GrapeId == 0 ? null : WineGrapeViewModel.GrapeId;
+
+        grapes = result.Data;
+    }
+
+    private async Task Save()
+    {
+        WineGrapeViewModel.GrapeId = grapeId.Value;
+        await OnSave.InvokeAsync().ConfigureAwait(false);
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancel.InvokeAsync().ConfigureAwait(false);
+    }
+}
