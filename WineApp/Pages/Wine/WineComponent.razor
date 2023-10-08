@@ -39,7 +39,12 @@ else
             </HxTab>
             <HxTab 
                 Id="grapes"
-                Title="Grapes">
+                Title="Grapes"
+                TitleTemplate="GrapesFragment">
+                <Content>
+                    <div class="spacer" />
+                    <WineGrapeComponent Wine="@Wine" OnSave="UpdateBadges" OnDelete="UpdateBadges" />
+                </Content>
             </HxTab>
             <HxTab 
                 Id="ratings"
@@ -114,6 +119,7 @@ else
     RenderFragment RatingsFragment;
     RenderFragment IssuesFragment;
     RenderFragment OverViewFlag;
+    RenderFragment GrapesFragment;
 
     protected override async Task OnInitializedAsync()
     {
@@ -167,6 +173,14 @@ else
             if (@Wine.Issues.Any())
             {
                 <HxBadge Color="ThemeColor.Primary">@Wine.Issues.Count()</HxBadge>
+            }
+        };
+
+        GrapesFragment = (__builder) =>
+        {
+            if (@Wine.Grapes.Any())
+            {
+                <HxBadge Color="ThemeColor.Primary">@Wine.Grapes.Count()</HxBadge>
             }
         };
     }
