@@ -1,14 +1,19 @@
-﻿namespace WineApp.ViewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WineApp.ViewModels
 {
     public class RegionViewModel
     {
         public int Id { get; set; }
 
+        [Required]
         public string Name { get; set; } = string.Empty;
 
+        [Required]
         public string IsoCode { get; set; } = string.Empty;
 
-        public CountryViewModel Country { get; set; }
+        [Required]
+        public int? CountryId { get; set; }
 
         public string Note { get; set; } = string.Empty;
 

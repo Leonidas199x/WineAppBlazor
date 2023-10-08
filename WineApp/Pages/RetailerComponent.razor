@@ -138,11 +138,13 @@
                         <HxInputNumber
                             LabelType="LabelType.Floating"
                             @bind-Value="@editableRetailer.MinimumPurchaseQuantity"
-                            Label="Minimum Purchase Quantity" />
+                            Label="Minimum Purchase Quantity"
+                                       ValidationMessageMode="ValidationMessageMode.None" />
                         <HxInputNumber 
                             LabelType="LabelType.Floating"
                             @bind-Value="@editableRetailer.IncrementQuantity"
-                            Label="Increment Quantity" />
+                            Label="Increment Quantity" 
+                            ValidationMessageMode="ValidationMessageMode.None" />
                         <HxInputText 
                             LabelType="LabelType.Floating"
                             ValidationMessageMode="ValidationMessageMode.None"
@@ -197,7 +199,8 @@
                          <HxInputNumber
                             LabelType="LabelType.Floating"
                             @bind-Value="@editableRetailer.MaxCustomerRating"
-                            Label="Max Customer" />
+                            Label="Max Customer" 
+                            ValidationMessageMode="ValidationMessageMode.None" />
                         <div class="modal-footer">
                             <table>
                                 <tr>

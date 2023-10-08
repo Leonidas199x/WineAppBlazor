@@ -11,9 +11,11 @@ namespace WineApp.ViewModels
         [DisplayName("Name")]
         public string Name { get; set; } = string.Empty;
 
+        [Required]
         [DisplayName("Minimum Purchase Quantity")]
         public int? MinimumPurchaseQuantity { get; set; }
 
+        [Required]
         [DisplayName("Increment Quantity")]
         public int? IncrementQuantity { get; set; }
 
@@ -35,6 +37,7 @@ namespace WineApp.ViewModels
         [DisplayName("Delivery Rating")]
         public int? DeliveryRating { get; set; }
 
+        [Required]
         [DisplayName("Max Customer Rating")]
         public int? MaxCustomerRating { get; set; }
 

@@ -117,8 +117,9 @@
         {
             <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
         }
-        <EditForm Model="@editableDrinker"
-                  OnValidSubmit=@Save>
+        <EditForm 
+            Model="@editableDrinker"
+            OnValidSubmit=@Save>
             <DataAnnotationsValidator />
             <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableDrinker.Name" Label="Name" />
             <div class="modal-footer">

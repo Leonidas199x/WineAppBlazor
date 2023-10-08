@@ -155,11 +155,12 @@
                             TValue="int?"
                             Label="Country"
                             Data="@countries"
-                            @bind-Value="@editableRegion.Country.Id"
+                            @bind-Value="@editableRegion.CountryId"
                             TextSelector="@(p => p.Name)"
                             ValueSelector="@(p => p.Id)"
                             Nullable="true"
-                            NullDataText="Loading Countries..." />
+                            NullDataText="Loading Countries..." 
+                            ValidationMessageMode="ValidationMessageMode.None"/>
                         <div class="modal-footer">
                             <table>
                                 <tr>
@@ -380,7 +381,6 @@
         await ClearEditError().ConfigureAwait(false);
         await SetCountries().ConfigureAwait(false);
         editableRegion = new RegionViewModel();
-        editableRegion.Country = new CountryViewModel();
 
         await InvokeAsync(editRegion.ShowAsync).ConfigureAwait(false);
     }
