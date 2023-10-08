@@ -1,66 +1,55 @@
-﻿@* @page "/Grapes"
+﻿@inject WineApp.Domain.IRequestService RequestService
 
-<h3>Grapes</h3>
+@page "/Grapes"
+
+<h3><MudIcon Icon="fas fa-lemon" /> Grapes</h3>
 
 <HxButton Color="ThemeColor.Primary" OnClick="ShowCreateModal" Icon="@BootstrapIcon.Plus" />
-<HxButton Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Search" />
+<HxButton CssClass="admin-filter" Color="ThemeColor.Secondary" OnClick="FilterOpen" Icon="@BootstrapIcon.Filter" />
+<div class="spacer" />
 
 <HxOffcanvas @ref="filter" Title="Filter">
     <BodyTemplate>
-        <HxInputText 
-            LabelType="LabelType.Floating" 
-            ValidationMessageMode="ValidationMessageMode.None"
-            @bind-Value="@filterGrapeName"
-            Label="Name" />
-        <hr/>
-        <HxInputText 
-            LabelType="LabelType.Floating" 
-            ValidationMessageMode="ValidationMessageMode.None" 
-            @bind-Value="@filterGrapeColour" 
-            Label="ISO Code" />
-        <hr/>
-        <HxButton 
-            OnClick="Filter" 
-            Text="Search" 
-            Color="ThemeColor.Secondary" />
-        <HxButton 
-            OnClick="ClearFilter" 
-            Text="Clear" 
-            Color="ThemeColor.Dark" />
+        <HxInputText LabelType="LabelType.Floating"
+                     ValidationMessageMode="ValidationMessageMode.None"
+                     @bind-Value="@filterName"
+                     Label="Colour" />
+        <hr />
+        <HxButton OnClick="Filter"
+                  Text="Search"
+                  Color="ThemeColor.Secondary" />
+        <HxButton OnClick="ClearFilter"
+                  Text="Clear"
+                  Color="ThemeColor.Secondary" />
     </BodyTemplate>
 </HxOffcanvas>
+
 @if (gridError)
 {
+    <div class="spacer" />
     <HxAlert Color="ThemeColor.Danger">@UserTextResponses.ErrorMessage</HxAlert>
 }
 
 @if (!isSearch)
 {
-    <HxGrid 
-        @ref="dataGrid"
-        TItem="Grape"
-        Responsive="true"
-        DataProvider="GetGridData"
-        PageSize="10"
-        Striped="true">
+    <HxGrid @ref="dataGrid"
+            TItem="Grape"
+            Responsive="true"
+            DataProvider="GetGridData"
+            PageSize="10"
+            Striped="true">
         <Columns>
-            <HxGridColumn 
-                HeaderText="Name"
-                ItemTextSelector="@(item => item.Name)"
-                SortString="@nameof(Grape.Name)"
-                IsDefaultSortColumn="true" />
-            <HxGridColumn 
-                HeaderText="ISO Code"
-                ItemTextSelector="@(item => item.IsoCode)"
-                SortString="@nameof(Grape.GrapeColourId)" />
+            <HxGridColumn HeaderText="Name"
+                          ItemTextSelector="@(item => item.Name)"
+                          SortString="@nameof(Grape.Name)"
+                          IsDefaultSortColumn="true" />
             <HxContextMenuGridColumn>
-                <HxButton 
-                    Text="Edit"
-                    Color="ThemeColor.Primary"
-                    OnClick="@(() => ShowEditModal(context))">
+                <HxButton Icon="BootstrapIcon.Pencil"
+                          Color="ThemeColor.Primary"
+                          OnClick="@(() => ShowEditModal(context))">
                 </HxButton>
-                <HxButton Text="Delete"
-                          Color="ThemeColor.Dark"
+                <HxButton Icon="BootstrapIcon.Trash"
+                          Color="ThemeColor.Secondary"
                           OnClick="@(() => ShowDeleteModal(context))">
                 </HxButton>
             </HxContextMenuGridColumn>
@@ -77,20 +66,17 @@
             PageSize="10"
             Striped="true">
         <Columns>
-            <HxGridColumn HeaderText="Name"
+            <HxGridColumn HeaderText="Colour"
                           ItemTextSelector="@(item => item.Name)"
-                          SortString="@nameof(Country.Name)"
+                          SortString="@nameof(Grape.Name)"
                           IsDefaultSortColumn="true" />
-            <HxGridColumn HeaderText="ISO Code"
-                          ItemTextSelector="@(item => item.IsoCode)"
-                          SortString="@nameof(Country.IsoCode)" />
             <HxContextMenuGridColumn>
-                <HxButton Text="Edit"
+                <HxButton Icon="BootstrapIcon.Pencil"
                           Color="ThemeColor.Primary"
                           OnClick="@(() => ShowEditModal(context))">
                 </HxButton>
-                <HxButton Text="Delete"
-                          Color="ThemeColor.Dark"
+                <HxButton Icon="BootstrapIcon.Trash"
+                          Color="ThemeColor.Secondary"
                           OnClick="@(() => ShowDeleteModal(context))">
                 </HxButton>
             </HxContextMenuGridColumn>
@@ -98,7 +84,366 @@
     </HxGrid>
 }
 
-@code {
+<HxModal @ref="deleteGrape"
+         Size="ModalSize.Regular"
+         Title="Delete Grape">
+    <BodyTemplate>
+        @if (deleteError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <p>Are you sure you wish to delete the grape '@deleteGrapeName'?</p>
+        <p>This action cannot be undone.</p>
+        <div class="modal-footer">
+            <table>
+                <tr>
+                    <td>
+                        <HxButton Text="Delete" Color="ThemeColor.Danger" OnClick="Delete" CssClass="modal-button" />
+                    </td>
+                    <td>
+                        <HxButton Text="Cancel" Color="ThemeColor.Secondary" OnClick="CloseDeleteModal" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </BodyTemplate>
 
+</HxModal>
+<HxModal @ref="editGrape"
+         Size="ModalSize.Large"
+         Title="Edit Grape">
+    <BodyTemplate>
+        @if (editError)
+        {
+            <HxAlert Color="ThemeColor.Danger">@errorString</HxAlert>
+        }
+        <EditForm 
+            Model="@editableGrape"
+            OnValidSubmit=@Save>
+            <DataAnnotationsValidator />
+            <HxInputText 
+                LabelType="LabelType.Floating" 
+                ValidationMessageMode="ValidationMessageMode.None" 
+                @bind-Value="@editableGrape.Name" 
+                Label="Name" />
+            <HxSelect 
+                TItem="GrapeColour"
+                TValue="int?"
+                Label="Grape Colour"
+                Data="@grapeColours"
+                @bind-Value="@editableGrape.GrapeColourId"
+                TextSelector="@(p => p.Colour)"
+                ValueSelector="@(p => p.Id)"
+                Nullable="true"
+                NullText=""
+                NullDataText="Loading Grape Colours..."
+                CssClass="input" />
+            <div class="modal-footer">
+                <table>
+                    <tr>
+                        <td>
+                            <HxSubmit Text="Save" Color="ThemeColor.Primary" CssClass="modal-button" />
+                        </td>
+                        <td>
+                            <HxButton Text="Cancel" Color="ThemeColor.Danger" OnClick="CloseEditModal" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </EditForm>
+    </BodyTemplate>
+</HxModal>
+
+@code {
+    [Inject] protected IHxMessengerService Messenger { get; set; }
+
+    string endpoint = "Grape";
+    bool gridError = false;
+    bool editError = false;
+    bool deleteError = false;
+    bool saveError = false;
+    bool isEdit = false;
+    bool isSearch = false;
+    int TotalPages = 0;
+    int resultsPerPage = 10;
+    string errorString = string.Empty;
+    private HxModal editGrape = new HxModal();
+    private HxModal deleteGrape = new HxModal();
+    private HxOffcanvas filter;
+    GrapeViewModel editableGrape;
+    EditContext editContext;
+    string filterName = string.Empty;
+    private HxGrid<Grape> dataGrid = new HxGrid<Grape>();
+    private HxGrid<Grape> searchGrid = new HxGrid<Grape>();
+    string deleteGrapeName = string.Empty;
+    int deleteGrapeId;
+    IEnumerable<GrapeColour>? grapeColours;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var colourResult = await RequestService.GetAll<GrapeColour>(1, 10000, "Grape/Colour");
+        if (!colourResult.IsSuccess)
+        {
+
+        }
+
+        grapeColours = colourResult.Data.Data;
+    }
+
+    private async Task<GridDataProviderResult<Grape>> GetGridData(GridDataProviderRequest<Grape> request)
+    {
+        try
+        {
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var result = await RequestService.GetAll<DataContract.Grape>(page, resultsPerPage, endpoint);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged);
+                return new GridDataProviderResult<Grape>();
+            }
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Grape>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged);
+
+            return new GridDataProviderResult<Grape>();
+        }
+
+    }
+
+    private async Task<GridDataProviderResult<Grape>> GetSearchData(GridDataProviderRequest<Grape> request)
+    {
+        try
+        {
+            isSearch = true;
+            await InvokeAsync(StateHasChanged);
+            var page = 1;
+            if (request.StartIndex > 0)
+            {
+                page = (request.StartIndex / resultsPerPage) + 1;
+            }
+
+            var searchParams = new Dictionary<string, string>();
+            searchParams.Add("name", filterName);
+
+            var result = await RequestService.Search<DataContract.Grape>(searchParams, page, resultsPerPage, endpoint);
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                gridError = true;
+                await InvokeAsync(StateHasChanged);
+                return new GridDataProviderResult<Grape>();
+            }
+
+            TotalPages = result.Data.TotalPages;
+
+            return new GridDataProviderResult<Grape>
+                {
+                    Data = result.Data.Data,
+                    TotalCount = result.Data.TotalRecords
+                };
+        }
+        catch (Exception)
+        {
+            gridError = true;
+            await InvokeAsync(StateHasChanged);
+
+            return new GridDataProviderResult<Grape>();
+        }
+
+    }
+
+    private async void ShowEditModal(Grape value)
+    {
+        try
+        {
+            await SetEdit(true);
+            await ClearEditError();
+
+            var result = await RequestService.Get<DataContract.Grape>(value.Id, endpoint);
+            if (!result.IsSuccess)
+            {
+                editError = true;
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            editableGrape = GrapeMapper.Map(result.Data);
+
+            await InvokeAsync(editGrape.ShowAsync);
+        }
+        catch (Exception)
+        {
+            editError = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async void ShowDeleteModal(Grape value)
+    {
+        deleteGrapeId = value.Id;
+        deleteGrapeName = value.Name;
+
+        await InvokeAsync(StateHasChanged);
+        await InvokeAsync(deleteGrape.ShowAsync);
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            var result = (isEdit)
+                        ? await SaveEdit()
+                        : await SaveNew();
+
+            if (!result.IsSuccess)
+            {
+                errorString = result.Error;
+                await InvokeAsync(StateHasChanged);
+                await ShowEditError();
+                return;
+            }
+
+            await RefreshGrid(isSearch);
+
+            Messenger.AddInformation(title: "Success", message: $"Grape '{editableGrape.Name}' saved successfully.");
+            await CloseEditModal();
+        }
+        catch (Exception)
+        {
+            await ShowEditError();
+        }
+    }
+
+    private async Task<Result> SaveEdit()
+    {
+        var grape = GrapeMapper.Map(editableGrape);
+
+        return await RequestService.Put(grape, endpoint);
+    }
+
+    private async Task<Result> SaveNew()
+    {
+        var grape = GrapeMapper.MapNew(editableGrape);
+
+        return await RequestService.Post(grape, endpoint);
+    }
+
+    private async Task ShowCreateModal()
+    {
+        await SetEdit(false);
+        await ClearEditError();
+        editableGrape = new GrapeViewModel();
+
+        await InvokeAsync(editGrape.ShowAsync);
+    }
+
+    private async Task ShowEditError()
+    {
+        editError = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ClearEditError()
+    {
+        editError = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CloseEditModal()
+    {
+        await editGrape.HideAsync();
+    }
+
+    private async Task CloseDeleteModal()
+    {
+        deleteError = false;
+        errorString = string.Empty;
+        await InvokeAsync(StateHasChanged);
+        await deleteGrape.HideAsync();
+    }
+
+    private async Task SetEdit(bool value)
+    {
+        isEdit = value;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task FilterOpen()
+    {
+        await filter.ShowAsync();
+    }
+
+    private async Task Filter()
+    {
+        isSearch = true;
+        await searchGrid.RefreshDataAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ClearFilter()
+    {
+        isSearch = false;
+        filterName = string.Empty;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            var result = await RequestService.Delete(deleteGrapeId, endpoint);
+            if (!result.IsSuccess)
+            {
+                errorString = $"There was an error deleting the record. The error is: {result.Error}";
+                deleteError = true;
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            Messenger.AddInformation(title: "Success", message: $"Grape '{deleteGrapeName}' deleted successfully.");
+
+            deleteGrapeId = default;
+            deleteGrapeName = string.Empty;
+
+            await RefreshGrid(isSearch);
+
+            await InvokeAsync(StateHasChanged);
+            await CloseDeleteModal();
+        }
+        catch (Exception)
+        {
+            errorString = $"There was an error deleting the grape";
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task RefreshGrid(bool isSearch)
+    {
+        if (isSearch)
+        {
+            await InvokeAsync(searchGrid.RefreshDataAsync);
+
+            return;
+        }
+
+        await InvokeAsync(dataGrid.RefreshDataAsync);
+    }
 }
- *@

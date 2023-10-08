@@ -152,7 +152,7 @@
                         <HxInputText LabelType="LabelType.Floating" ValidationMessageMode="ValidationMessageMode.None" @bind-Value="@editableRegion.IsoCode" Label="ISO Code" />
                         <HxSelect 
                             TItem="CountryLookup"
-                            TValue="int"
+                            TValue="int?"
                             Label="Country"
                             Data="@countries"
                             @bind-Value="@editableRegion.Country.Id"

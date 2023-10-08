@@ -22,7 +22,7 @@ namespace WineApp.Mappers
         {
             return new Country
             {
-                Id = value.Id,
+                Id = value.Id.Value,
                 Name = value.Name,
                 IsoCode = value.IsoCode,
                 DateCreated = value.DateCreated,

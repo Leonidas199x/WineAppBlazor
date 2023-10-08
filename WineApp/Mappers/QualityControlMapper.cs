@@ -40,7 +40,7 @@ namespace WineApp.Mappers
             {
                 Name = value.Name,
                 Note = value.Note,
-                CountryId = value.Country.Id,
+                CountryId = value.Country.Id.Value,
             };
         }
     }

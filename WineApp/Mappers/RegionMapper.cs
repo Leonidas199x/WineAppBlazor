@@ -53,7 +53,7 @@ namespace WineApp.Mappers
                 Note = value.Note,
                 Longitude = value.Longitude,
                 Latitude = value.Latitude,
-                CountryId = value.Country.Id,
+                CountryId = value.Country.Id.Value,
             };
         }
     }

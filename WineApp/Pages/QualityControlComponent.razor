@@ -133,7 +133,7 @@
                 Label="Note" />
             <HxSelect 
                 TItem="CountryLookup"
-                TValue="int"
+                TValue="int?"
                 Label="Country"
                 Data="@countries"
                 @bind-Value="@editableModel.Country.Id"
@@ -295,6 +295,8 @@
     {
         deleteId = value.Id;
         deleteName = value.Name;
+        errorString = string.Empty;
+        deleteError = false;
 
         await InvokeAsync(StateHasChanged).ConfigureAwait(false);
         await InvokeAsync(deleteQc.ShowAsync).ConfigureAwait(false);
